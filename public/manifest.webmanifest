@@ -1,0 +1,24 @@
+{
+  "name": "Locora \u2014 AI-Powered Hyperlocal Marketplace",
+  "short_name": "Locora",
+  "description": "Your neighbourhood, powered by AI. Buy, sell and discover trusted local services near you.",
+  "id": "/",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0163DD",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

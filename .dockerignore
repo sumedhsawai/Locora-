@@ -1,0 +1,9 @@
+node_modules
+.next
+out
+*.tsbuildinfo
+.git
+Dockerfile
+.dockerignore
+locora-source.zip
+README.md
