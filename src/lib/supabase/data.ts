@@ -11,7 +11,7 @@ import type {
   AppState, BuyRequest, Conversation, LocoraLocation, Message, Product,
   Review, Service, User,
 } from "@/lib/types";
-import { profileToUser, type ProfileRow } from "./auth";
+import { PROFILE_COLUMNS, profileToUser, type ProfileRow } from "./auth";
 import { areaLocation } from "@/lib/geo";
 
 type Sb = NonNullable<ReturnType<typeof import("./client").supabase>>;
@@ -178,7 +178,7 @@ function rowToReview(r: ReviewRow, users: User[]): Review {
 /** Load the signed-in user's world from the database into AppState. */
 export async function hydrateAll(sb: Sb, sessionUserId: string): Promise<Partial<AppState> | null> {
   const [proRes, prodRes, svcRes, reqRes, revRes, favRes, conRes, meRes, adminRes] = await Promise.all([
-    sb.from("profiles").select("*").order("joined_at", { ascending: true }),
+    sb.from("profiles").select(PROFILE_COLUMNS).order("joined_at", { ascending: true }),
     sb.from("products").select("*").order("created_at", { ascending: false }),
     sb.from("services").select("*").order("created_at", { ascending: false }),
     sb.from("buy_requests").select("*").order("created_at", { ascending: false }),

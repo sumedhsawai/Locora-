@@ -92,15 +92,17 @@ export function ListingCard({
           )}
         </div>
         <div className="p-3.5">
-          <div className="flex items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
             <p className="text-[17px] font-extrabold tracking-tight text-ink-900">{inr(product.price)}</p>
             <PriceCheckChip product={product} />
           </div>
           <h3 className="mt-0.5 truncate text-[13.5px] font-semibold text-ink-800">{product.title}</h3>
-          <p className="mt-1.5 flex items-center gap-1 text-[11.5px] font-medium text-ink-400">
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-1 gap-y-0.5 text-[11.5px] font-medium text-ink-400">
             <MapPin size={11} className="shrink-0" />
-            {areaName(product.area)}
-            {distance !== undefined && <span className="font-bold text-brand-600">· {kmFmt(distance)}</span>}
+            <span className="min-w-0">
+              {areaName(product.area)}
+              {distance !== undefined && <span className="font-bold text-brand-600">· {kmFmt(distance)}</span>}
+            </span>
             <span className="ml-auto shrink-0">{timeAgo(product.createdAt)}</span>
           </p>
           {seller && (
@@ -180,7 +182,7 @@ export function ServiceCard({ service, provider, distance }: { service: Service;
               {service.experienceYears}+ yrs exp
             </span>
           </div>
-          <div className="mt-3.5 flex items-center justify-between border-t border-stone-100 pt-3 text-[13px] font-bold text-ink-900">
+          <div className="mt-3.5 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 border-t border-stone-100 pt-3 text-[13px] font-bold text-ink-900">
             <span>
               from {inr(service.startingPrice)}
               <span className="text-[11px] font-semibold text-ink-400">{priceUnitLabel(service.priceUnit)}</span>

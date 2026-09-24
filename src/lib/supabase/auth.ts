@@ -30,6 +30,15 @@ export interface ProfileRow {
   username: string | null;
 }
 
+/**
+ * Columns the app reads from public.profiles. email/phone are intentionally
+ * absent: they are PII, not included in the public SELECT grants, and come
+ * through the my_private_profile / admin_profiles RPCs instead. NEVER use
+ * select("*") on profiles — it 403s under the column-level grants.
+ */
+export const PROFILE_COLUMNS =
+  "id,name,role,area,joined_at,avatar_from,avatar_to,verified,bio,rating,reviews_count,response_mins,banned,city,state,country,lat,lng,is_demo,username";
+
 /** Map a Supabase profiles row (snake_case) → the app's User type. */
 export function profileToUser(p: ProfileRow, fallbackEmail?: string): User {
   return {
@@ -77,13 +86,21 @@ export async function loadSessionUser(session: Session): Promise<User | null> {
   const sb = supabase();
   if (!sb) return null;
 
-  const { data: profile } = await sb
-    .from("profiles")
-    .select("*")
-    .eq("id", session.user.id)
-    .maybeSingle();
+  const [profileRes, contactRes] = await Promise.all([
+    sb.from("profiles").select(PROFILE_COLUMNS).eq("id", session.user.id).maybeSingle(),
+    sb.rpc("my_private_profile"),
+  ]);
+  const profile = profileRes.data as Partial<ProfileRow> | null;
 
-  if (profile) return profileToUser(profile as ProfileRow, session.user.email ?? undefined);
+  if (profile) {
+    const contact = ((contactRes.data ?? []) as { id: string; email: string | null; phone: string | null }[]).find(
+      (c) => c.id === session.user.id,
+    );
+    return profileToUser(
+      { ...profile, email: contact?.email ?? "", phone: contact?.phone ?? "" } as ProfileRow,
+      session.user.email ?? undefined,
+    );
+  }
   // profiles table not migrated yet (or trigger missed) — fall back to metadata
   return authUserToUser(session.user);
 }

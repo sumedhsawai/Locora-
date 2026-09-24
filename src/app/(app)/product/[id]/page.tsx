@@ -232,6 +232,14 @@ export default function ProductPage() {
   };
 
   const pc = product.priceCheck;
+  // demo listings: the "seller" is a sample account — contact CTAs are faded off
+  const demoListing = !!product.isDemo || !!seller?.isDemo;
+  const demoCtaToast = () =>
+    push({
+      kind: "info",
+      title: "Demo listing",
+      body: "This seller is a sample account and can't reply. Try the chat on a real listing!",
+    });
 
   return (
     <div className="space-y-8">
@@ -311,7 +319,11 @@ export default function ProductPage() {
                   {product.negotiable ? "Price slightly negotiable" : "Price fixed"}
                 </p>
               </div>
-              <Button variant="softBrand" onClick={() => setOfferOpen(true)}>
+              <Button
+                variant="softBrand"
+                className={demoListing ? "opacity-55" : ""}
+                onClick={() => (demoListing ? demoCtaToast() : setOfferOpen(true))}
+              >
                 <IndianRupee size={15} /> Make an offer
               </Button>
             </div>
@@ -414,9 +426,18 @@ export default function ProductPage() {
               </div>
             ) : (
               <div className="space-y-2.5">
-                <Button size="lg" className="w-full" onClick={openChat}>
+                <Button
+                  size="lg"
+                  className={`w-full ${demoListing ? "opacity-55" : ""}`}
+                  onClick={() => (demoListing ? demoCtaToast() : openChat())}
+                >
                   <MessageCircle size={17} /> Chat with seller
                 </Button>
+                {demoListing && (
+                  <p className="text-center text-[11px] font-semibold text-ink-400">
+                    Chat is switched off on demo listings
+                  </p>
+                )}
                 <div className="grid grid-cols-3 gap-2">
                   <Button variant="secondary" onClick={() => dispatch({ type: "TOGGLE_FAVORITE", productId: product.id })} className={favorited ? "!text-rose-600 !ring-rose-200" : ""}>
                     <Heart size={15} fill={favorited ? "currentColor" : "none"} /> {favorited ? "Saved" : "Save"}

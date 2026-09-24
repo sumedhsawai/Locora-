@@ -288,6 +288,25 @@ export default function ServicePage() {
               <div className="mt-4 rounded-xl bg-brand-50 px-4 py-3 text-center text-[13px] font-bold text-brand-700 ring-1 ring-brand-100">
                 This is your service profile ✓
               </div>
+            ) : service.isDemo || provider?.isDemo ? (
+              <>
+                <Button
+                  size="lg"
+                  className="mt-4 w-full opacity-55"
+                  onClick={() =>
+                    push({
+                      kind: "info",
+                      title: "Demo service",
+                      body: "This pro is a sample account and can't reply. Try a real service instead!",
+                    })
+                  }
+                >
+                  <MessageCircle size={17} /> Get a quote
+                </Button>
+                <p className="mt-1.5 text-center text-[11px] font-semibold text-ink-400">
+                  Chat is switched off on demo services
+                </p>
+              </>
             ) : (
               <Button size="lg" className="mt-4 w-full" onClick={getQuote}>
                 <MessageCircle size={17} /> Get a quote
