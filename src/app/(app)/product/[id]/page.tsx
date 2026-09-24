@@ -454,6 +454,11 @@ export default function ProductPage() {
                   <p className="mt-0.5 text-[12px] font-medium text-ink-400">
                     {areaName(seller.area)} · joined {joinedOn(seller.joinedAt)}
                   </p>
+                  {seller.username && (
+                    <Link href={`/u/${seller.username}`} className="mt-1 inline-flex items-center gap-1 text-[12px] font-bold text-brand-600 transition hover:text-brand-700">
+                      @{seller.username} · view profile →
+                    </Link>
+                  )}
                 </div>
               </div>
               {seller.bio && <p className="mt-3 line-clamp-2 text-[12.5px] leading-relaxed text-ink-500">{seller.bio}</p>}

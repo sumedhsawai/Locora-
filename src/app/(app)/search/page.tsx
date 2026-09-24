@@ -1,12 +1,13 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowRight, History, Megaphone, Search, ShieldCheck, SlidersHorizontal, Sparkles, X,
 } from "lucide-react";
 import { ListingCard, ServiceCard } from "@/components/cards";
-import { Badge, Button, EmptyState, ListingCardSkeleton } from "@/components/ui";
+import { Avatar, Badge, Button, EmptyState, ListingCardSkeleton } from "@/components/ui";
 import { SEARCH_EXAMPLES, parseSearchQuery, type SearchParse } from "@/lib/ai";
 import { distanceBetweenAreas } from "@/lib/geo";
 import { inr, km as kmFmt } from "@/lib/format";
@@ -164,7 +165,7 @@ function SearchInner() {
           autoFocus
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Describe what you need — “deep cleaning before Diwali, 2BHK”"
+          placeholder="What do you need? Try “deep cleaning before Diwali” — or @username"
           className="min-w-0 flex-1 bg-transparent py-2.5 text-[14.5px] outline-none placeholder:text-ink-300"
           aria-label="Search Locora"
         />
@@ -180,6 +181,40 @@ function SearchInner() {
           <Sparkles size={15} /> Search
         </button>
       </form>
+
+      {/* people matching the query (by @username or name) */}
+      {(() => {
+        const q = query.trim().toLowerCase().replace(/^@/, "");
+        if (!q || !hydrated) return null;
+        const people = state.users
+          .filter((u) => !u.banned)
+          .filter((u) => (u.username ?? "").toLowerCase().includes(q) || u.name.toLowerCase().includes(q))
+          .slice(0, 6);
+        if (!people.length) return null;
+        return (
+          <div className="animate-fade-up">
+            <p className="mb-2.5 text-[12px] font-extrabold uppercase tracking-wider text-ink-400">People</p>
+            <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">
+              {people.map((u) => (
+                <Link
+                  key={u.id}
+                  href={`/u/${u.username}`}
+                  className="flex w-[210px] shrink-0 items-center gap-3 rounded-2xl bg-white p-3 shadow-card ring-1 ring-stone-100/70 transition hover:-translate-y-0.5 hover:shadow-soft"
+                >
+                  <Avatar user={u} size="md" ring={false} />
+                  <div className="min-w-0">
+                    <p className="truncate text-[13px] font-extrabold text-ink-900">{u.name}</p>
+                    <p className="truncate text-[11.5px] font-bold text-brand-600">@{u.username}</p>
+                    <p className="text-[10.5px] font-semibold capitalize text-ink-400">
+                      {u.role === "provider" ? "service pro" : u.role}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* no query yet */}
       {!query && !thinking && !parse && (

@@ -62,6 +62,7 @@ export interface User {
   responseMins?: number; // avg response time
   banned?: boolean;
   isDemo?: boolean; // sample account shown for illustration only
+  username?: string; // unique public handle, e.g. "sumedh"
 }
 
 export interface PriceCheck {

@@ -4,8 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  BadgeCheck, Crosshair, Download, Eye, Heart, Loader2, Megaphone, MessageCircle, Package,
-  ShieldCheck, Sparkles, Star, Trash2, Wrench,
+  AtSign, BadgeCheck, CheckCircle2, Crosshair, Download, Eye, Heart, Loader2, Megaphone,
+  MessageCircle, Package, Phone, ShieldCheck, Sparkles, Star, Trash2, Wrench, X,
 } from "lucide-react";
 import { ListingCard } from "@/components/cards";
 import { Avatar, Badge, Button, Modal, RatingStars, Skeleton } from "@/components/ui";
@@ -155,9 +155,76 @@ export default function ProfilePage() {
   };
   const [tab, setTab] = React.useState<"listings" | "services" | "saved" | "reviews" | "requests">("listings");
 
+  /* ---------------- edit profile ---------------- */
+  const [editOpen, setEditOpen] = React.useState(false);
+  const [editName, setEditName] = React.useState("");
+  const [editUsername, setEditUsername] = React.useState("");
+  const [editBio, setEditBio] = React.useState("");
+  const [editPhone, setEditPhone] = React.useState("");
+  const [editErr, setEditErr] = React.useState("");
+  const [saving, setSaving] = React.useState(false);
+  const [editStatus, setEditStatus] = React.useState<"idle" | "checking" | "ok" | "taken" | "invalid">("idle");
+
+  React.useEffect(() => {
+    if (!editOpen) return;
+    const u = editUsername.trim().toLowerCase();
+    if (!u || u === currentUser?.username) { setEditStatus("idle"); return; }
+    if (!/^[a-z0-9_]{3,20}$/.test(u)) { setEditStatus("invalid"); return; }
+    setEditStatus("checking");
+    const t = setTimeout(async () => {
+      try {
+        const sb = supabase();
+        if (!sb) return setEditStatus("ok");
+        const { data } = await sb.from("profiles").select("username").eq("username", u).limit(1);
+        setEditStatus(data && data.length ? "taken" : "ok");
+      } catch {
+        setEditStatus("ok");
+      }
+    }, 450);
+    return () => clearTimeout(t);
+  }, [editUsername, editOpen, currentUser?.username]);
+
   if (!hydrated || !currentUser) return <Skeleton className="mx-auto mt-10 h-96 max-w-3xl rounded-3xl" />;
 
   const me = currentUser;
+
+  const openEdit = () => {
+    setEditName(me.name);
+    setEditUsername(me.username ?? "");
+    setEditBio(me.bio ?? "");
+    setEditPhone(me.phone ?? "");
+    setEditErr("");
+    setEditStatus("idle");
+    setEditOpen(true);
+  };
+
+  const saveProfile = async () => {
+    const u = editUsername.trim().toLowerCase();
+    if (editName.trim().length < 2) return setEditErr("Please enter your name.");
+    if (!/^[a-z0-9_]{3,20}$/.test(u)) return setEditErr("Username must be 3–20 characters (a–z, 0–9, _).");
+    if (editStatus === "taken") return setEditErr("That username is taken — try another.");
+    setSaving(true);
+    try {
+      if (REAL_MODE) {
+        const sb = supabase();
+        if (sb) {
+          const { error } = await sb
+            .from("profiles")
+            .update({ name: editName.trim(), username: u, bio: editBio.trim() || null, phone: editPhone.trim() })
+            .eq("id", me.id);
+          if (error) {
+            setEditErr(error.code === "23505" ? "That username is already taken." : error.message);
+            return;
+          }
+        }
+      }
+      dispatch({ type: "UPSERT_USER", user: { ...me, name: editName.trim(), username: u, bio: editBio.trim() || undefined, phone: editPhone.trim() } });
+      setEditOpen(false);
+      push({ kind: "success", title: "Profile updated ✓" });
+    } finally {
+      setSaving(false);
+    }
+  };
   const myListings = state.products.filter((p) => p.sellerId === me.id).sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
   const myServices = state.services.filter((s) => s.providerId === me.id);
   const sold = myListings.filter((p) => p.status === "sold").length;
@@ -186,7 +253,7 @@ export default function ProfilePage() {
         <div className="px-5 pb-5 sm:px-6">
           <div className="-mt-10 flex items-end justify-between">
             <Avatar user={me} size="2xl" />
-            <Button variant="secondary" size="sm" onClick={() => { push({ kind: "info", title: "Profile editing lands with Supabase accounts" }); }}>
+            <Button variant="secondary" size="sm" onClick={openEdit}>
               Edit profile
             </Button>
           </div>
@@ -202,7 +269,9 @@ export default function ProfilePage() {
             </Badge>
           </div>
           <p className="mt-1 text-[13px] font-medium text-ink-400">
-            {placeLabel(placeOf(me))} · member since {joinedOn(me.joinedAt)} · replies in {responseLabel(me.responseMins ?? 15)}
+            {placeLabel(placeOf(me))}
+            {me.username ? ` · @${me.username}` : ""} · member since {joinedOn(me.joinedAt)} · replies in{" "}
+            {responseLabel(me.responseMins ?? 15)}
           </p>
           {me.bio && <p className="mt-2.5 max-w-xl text-[13.5px] leading-relaxed text-ink-600">{me.bio}</p>}
 
@@ -511,6 +580,72 @@ export default function ProfilePage() {
       </div>
 
       {/* delete confirmation */}
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} className="max-w-md">
+        <h3 className="text-[17px] font-extrabold text-ink-900">Edit profile</h3>
+        <div className="mt-4 space-y-3.5">
+          <label className="block">
+            <span className="mb-1.5 block text-[13px] font-bold text-ink-700">Full name</span>
+            <span className="flex items-center gap-2.5 rounded-xl bg-stone-50 px-3.5 ring-1 ring-stone-200 transition focus-within:ring-2 focus-within:ring-brand-500">
+              <input value={editName} onChange={(e) => setEditName(e.target.value)} className="w-full bg-transparent py-2.5 text-[14px] outline-none" />
+            </span>
+          </label>
+          <label className="block">
+            <span className="mb-1.5 block text-[13px] font-bold text-ink-700">Username</span>
+            <span
+              className={`flex items-center gap-2.5 rounded-xl bg-stone-50 px-3.5 ring-1 transition focus-within:ring-2 focus-within:ring-brand-500 ${
+                editStatus === "taken" || editStatus === "invalid" ? "ring-rose-300" : editStatus === "ok" ? "ring-emerald-300" : "ring-stone-200"
+              }`}
+            >
+              <AtSign size={15} className="shrink-0 text-ink-400" />
+              <input
+                value={editUsername}
+                onChange={(e) => setEditUsername(e.target.value.toLowerCase())}
+                className="w-full bg-transparent py-2.5 text-[14px] outline-none"
+                autoComplete="username"
+              />
+              {editStatus === "checking" && <Loader2 size={14} className="shrink-0 animate-spin text-ink-300" />}
+              {editStatus === "ok" && <CheckCircle2 size={14} className="shrink-0 text-emerald-500" />}
+              {(editStatus === "taken" || editStatus === "invalid") && <X size={14} className="shrink-0 text-rose-400" />}
+            </span>
+            <span className={`mt-1 block text-[11px] font-semibold ${editStatus === "taken" || editStatus === "invalid" ? "text-rose-500" : "text-ink-400"}`}>
+              {editStatus === "taken"
+                ? "That username is taken."
+                : editStatus === "invalid"
+                  ? "3–20 characters: a–z, 0–9, _."
+                  : "People can find you by searching @username"}
+            </span>
+          </label>
+          <label className="block">
+            <span className="mb-1.5 block text-[13px] font-bold text-ink-700">
+              Phone <span className="font-medium text-ink-400">(private)</span>
+            </span>
+            <span className="flex items-center gap-2.5 rounded-xl bg-stone-50 px-3.5 ring-1 ring-stone-200 transition focus-within:ring-2 focus-within:ring-brand-500">
+              <Phone size={15} className="shrink-0 text-ink-400" />
+              <input value={editPhone} onChange={(e) => setEditPhone(e.target.value)} placeholder="+91 98XXXXXXXX" inputMode="tel" className="w-full bg-transparent py-2.5 text-[14px] outline-none placeholder:text-ink-300" />
+            </span>
+          </label>
+          <label className="block">
+            <span className="mb-1.5 block text-[13px] font-bold text-ink-700">Bio</span>
+            <textarea
+              value={editBio}
+              onChange={(e) => setEditBio(e.target.value)}
+              rows={3}
+              placeholder="A line about you — what you sell or the services you offer"
+              className="w-full rounded-xl bg-stone-50 px-3.5 py-2.5 text-[14px] outline-none ring-1 ring-stone-200 transition focus:ring-2 focus:ring-brand-500 placeholder:text-ink-300"
+            />
+          </label>
+        </div>
+        {editErr && (
+          <p className="mt-3 rounded-xl bg-rose-50 px-3.5 py-2.5 text-[12.5px] font-semibold text-rose-600" role="alert">{editErr}</p>
+        )}
+        <div className="mt-5 flex justify-end gap-2.5">
+          <Button variant="secondary" onClick={() => setEditOpen(false)}>Cancel</Button>
+          <Button onClick={saveProfile} disabled={saving || editStatus === "checking" || editStatus === "taken"}>
+            {saving ? <Loader2 size={15} className="animate-spin" /> : null} Save changes
+          </Button>
+        </div>
+      </Modal>
+
       <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} className="max-w-sm">
         <div className="flex flex-col items-center text-center">
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-500 ring-1 ring-rose-100">

@@ -27,6 +27,7 @@ export interface ProfileRow {
   response_mins: number | null;
   banned: boolean | null;
   is_demo: boolean | null;
+  username: string | null;
 }
 
 /** Map a Supabase profiles row (snake_case) → the app's User type. */
@@ -48,6 +49,7 @@ export function profileToUser(p: ProfileRow, fallbackEmail?: string): User {
     responseMins: p.response_mins ?? 15,
     banned: p.banned ?? false,
     isDemo: p.is_demo ?? false,
+    username: p.username ?? undefined,
   };
 }
 
@@ -115,6 +117,8 @@ export async function signUpWithEmail(opts: {
   name: string;
   role: Role;
   area: string;
+  username?: string;
+  phone?: string;
 }) {
   const sb = supabase();
   if (!sb) throw new Error("Supabase is not configured");
@@ -122,7 +126,13 @@ export async function signUpWithEmail(opts: {
     email: opts.email.trim().toLowerCase(),
     password: opts.password,
     options: {
-      data: { name: opts.name.trim(), role: opts.role, area: opts.area },
+      data: {
+        name: opts.name.trim(),
+        role: opts.role,
+        area: opts.area,
+        username: opts.username?.trim().toLowerCase(),
+        phone: opts.phone?.trim(),
+      },
       emailRedirectTo:
         typeof window !== "undefined" ? `${window.location.origin}/login` : undefined,
     },

@@ -315,6 +315,11 @@ export default function ServicePage() {
                   <p className="mt-0.5 text-[12px] font-medium text-ink-400">
                     {areaName(provider.area)} · joined {joinedOn(provider.joinedAt)}
                   </p>
+                  {provider.username && (
+                    <Link href={`/u/${provider.username}`} className="mt-1 inline-flex items-center gap-1 text-[12px] font-bold text-brand-600 transition hover:text-brand-700">
+                      @{provider.username} · view profile →
+                    </Link>
+                  )}
                 </div>
               </div>
               {provider.bio && <p className="mt-3 text-[12.5px] leading-relaxed text-ink-500">{provider.bio}</p>}

@@ -4,8 +4,8 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  ArrowLeft, ArrowRight, BadgeCheck, CheckCircle2, ExternalLink, Eye, EyeOff,
-  Lock, Mail, Sparkles, User,
+  ArrowLeft, ArrowRight, AtSign, BadgeCheck, CheckCircle2, ExternalLink, Eye, EyeOff,
+  Loader2, Lock, Mail, Phone, Sparkles, User, X,
 } from "lucide-react";
 import { Logo } from "@/components/brand";
 import { Button, Spinner } from "@/components/ui";
@@ -65,6 +65,9 @@ function LoginForm() {
   const [password, setPassword] = React.useState("");
   const [name, setName] = React.useState("");
   const [role, setRole] = React.useState<Role>("buyer");
+  const [username, setUsername] = React.useState("");
+  const [phone, setPhone] = React.useState("");
+  const [unameStatus, setUnameStatus] = React.useState<"idle" | "checking" | "ok" | "taken" | "invalid">("idle");
   const [showPw, setShowPw] = React.useState(false);
   const [error, setError] = React.useState("");
   const [notice, setNotice] = React.useState("");
@@ -81,6 +84,26 @@ function LoginForm() {
   const go = (to: string) => {
     router.replace(to);
   };
+
+  /* live username availability (real mode, sign-up only) */
+  React.useEffect(() => {
+    if (mode !== "signup" || !REAL_MODE) { setUnameStatus("idle"); return; }
+    const u = username.trim().toLowerCase();
+    if (!u) { setUnameStatus("idle"); return; }
+    if (!/^[a-z0-9_]{3,20}$/.test(u)) { setUnameStatus("invalid"); return; }
+    setUnameStatus("checking");
+    const t = setTimeout(async () => {
+      try {
+        const sb = supabase();
+        if (!sb) return setUnameStatus("ok");
+        const { data } = await sb.from("profiles").select("username").eq("username", u).limit(1);
+        setUnameStatus(data && data.length ? "taken" : "ok");
+      } catch {
+        setUnameStatus("ok");
+      }
+    }, 450);
+    return () => clearTimeout(t);
+  }, [username, mode]);
 
   /* ---------------- real (Supabase) auth ---------------- */
 
@@ -114,6 +137,7 @@ function LoginForm() {
       const { data, error: err } = await signUpWithEmail({
         email, password, name, role,
         area: state.browseLocation?.city ?? "viman",
+        username, phone,
       });
       if (err) {
         setError(friendlyAuthError(err.message));
@@ -184,6 +208,7 @@ function LoginForm() {
           id: uid("u"),
           name: name.trim(),
           role,
+          username: username.trim().toLowerCase() || undefined,
           area: state.browseLocation?.city ?? "viman",
           location: state.browseLocation ?? undefined,
           email: email.toLowerCase().trim(),
@@ -216,6 +241,9 @@ function LoginForm() {
     if (REAL_MODE) {
       if (mode === "signin") return void realSignIn();
       if (name.trim().length < 2) return setError("Please enter your full name.");
+      const u = username.trim().toLowerCase();
+      if (!/^[a-z0-9_]{3,20}$/.test(u)) return setError("Please choose a username: 3–20 characters (a–z, 0–9, _).");
+      if (unameStatus === "taken") return setError("That username is taken — try another.");
       if (password.length < 8) return setError("Password must be at least 8 characters.");
       return void realSignUp();
     }
@@ -368,6 +396,50 @@ function LoginForm() {
               </label>
             )}
 
+            {mode === "signup" && (
+              <label className="block">
+                <span className="mb-1.5 block text-[13px] font-bold text-ink-700">Username</span>
+                <span
+                  className={`flex items-center gap-2.5 rounded-xl bg-white px-3.5 ring-1 transition focus-within:ring-2 focus-within:ring-brand-500 ${
+                    unameStatus === "taken" || unameStatus === "invalid"
+                      ? "ring-rose-300"
+                      : unameStatus === "ok"
+                        ? "ring-emerald-300"
+                        : "ring-stone-200"
+                  }`}
+                >
+                  <AtSign size={16} className="shrink-0 text-ink-400" />
+                  <input
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value.toLowerCase())}
+                    placeholder="e.g. sumedh_sawai"
+                    className="w-full bg-transparent py-3 text-[14.5px] outline-none placeholder:text-ink-300"
+                    autoComplete="username"
+                  />
+                  {unameStatus === "checking" && <Loader2 size={15} className="shrink-0 animate-spin text-ink-300" />}
+                  {unameStatus === "ok" && <CheckCircle2 size={15} className="shrink-0 text-emerald-500" />}
+                  {(unameStatus === "taken" || unameStatus === "invalid") && <X size={15} className="shrink-0 text-rose-400" />}
+                </span>
+                <span
+                  className={`mt-1 block text-[11.5px] font-semibold ${
+                    unameStatus === "taken" || unameStatus === "invalid"
+                      ? "text-rose-500"
+                      : unameStatus === "ok"
+                        ? "text-emerald-600"
+                        : "text-ink-400"
+                  }`}
+                >
+                  {unameStatus === "taken"
+                    ? "That username is taken — try another."
+                    : unameStatus === "invalid"
+                      ? "3–20 characters: lowercase letters, numbers, underscores."
+                      : unameStatus === "ok"
+                        ? "✓ Available — people can find you as @" + username.trim().toLowerCase()
+                        : "Your unique handle on Locora — a–z, 0–9, _ (3–20 chars)"}
+                </span>
+              </label>
+            )}
+
             <label className="block">
               <span className="mb-1.5 block text-[13px] font-bold text-ink-700">Email</span>
               <span className="flex items-center gap-2.5 rounded-xl bg-white px-3.5 ring-1 ring-stone-200 transition focus-within:ring-2 focus-within:ring-brand-500">
@@ -422,6 +494,25 @@ function LoginForm() {
 
             {mode === "signup" && (
               <>
+                <label className="block">
+                  <span className="mb-1.5 block text-[13px] font-bold text-ink-700">
+                    Phone <span className="font-medium text-ink-400">(optional)</span>
+                  </span>
+                  <span className="flex items-center gap-2.5 rounded-xl bg-white px-3.5 ring-1 ring-stone-200 transition focus-within:ring-2 focus-within:ring-brand-500">
+                    <Phone size={16} className="shrink-0 text-ink-400" />
+                    <input
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+91 98XXXXXXXX"
+                      className="w-full bg-transparent py-3 text-[14.5px] outline-none placeholder:text-ink-300"
+                      inputMode="tel"
+                    />
+                  </span>
+                  <span className="mt-1 block text-[11.5px] font-semibold text-ink-400">
+                    Only you can see this — it is never shown on your profile.
+                  </span>
+                </label>
+
                 <div>
                   <span className="mb-1.5 block text-[13px] font-bold text-ink-700">I am a…</span>
                   <div className="grid grid-cols-3 gap-2">

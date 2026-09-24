@@ -35,8 +35,11 @@ create table if not exists public.profiles (
   reviews_count integer not null default 0,
   response_mins integer not null default 15,
   banned        boolean not null default false,
-  is_demo       boolean not null default false
+  is_demo       boolean not null default false,
+  username      text not null check (username ~ '^[a-z0-9_]{3,20}$')
 );
+
+create unique index if not exists profiles_username_key on public.profiles (username);
 
 create or replace function public.is_admin()
 returns boolean
@@ -48,23 +51,48 @@ as $$
   );
 $$;
 
--- auto-create a profile whenever someone signs up
+-- auto-create a profile whenever someone signs up (username + phone included)
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql security definer set search_path = public
 as $$
 declare
   g text[];
+  base text;
+  u text;
+  n integer := 0;
 begin
   g := array['#0390E0,#014093', '#6366F1,#4338CA', '#02A4B3,#0174B7',
              '#EC4899,#BE185D', '#13CA9E,#089271', '#8B5CF6,#6D28D9'];
-  insert into public.profiles (id, name, role, area, email, avatar_from, avatar_to)
+  -- username: the validated one from sign-up if given, else derived from the name;
+  -- always unique
+  u := regexp_replace(
+         lower(coalesce(nullif(trim(new.raw_user_meta_data ->> 'username'), ''),
+                        split_part(coalesce(new.raw_user_meta_data ->> 'name', 'New user'), ' ', 1))),
+         '[^a-z0-9_]', '', 'g');
+  if u is null or length(u) < 3 then
+    u := 'neighbour';
+  end if;
+  u := left(u, 20);
+  base := u;
+  while exists (select 1 from public.profiles where username = u) loop
+    n := n + 1;
+    if n > 99 then
+      u := left(base, 12) || '_' || substr(md5(random()::text), 1, 6);
+      exit;
+    end if;
+    u := left(base, greatest(3, 20 - length(n::text))) || n::text;
+  end loop;
+
+  insert into public.profiles (id, name, role, area, email, phone, username, avatar_from, avatar_to)
   values (
     new.id,
     coalesce(nullif(trim(new.raw_user_meta_data ->> 'name'), ''), 'New user'),
     coalesce(new.raw_user_meta_data ->> 'role', 'buyer'),
     coalesce(new.raw_user_meta_data ->> 'area', 'viman'),
     coalesce(new.email, ''),
+    coalesce(nullif(trim(new.raw_user_meta_data ->> 'phone'), ''), ''),
+    u,
     split_part(g[1 + (abs(hashtext(new.id::text)) % array_length(g, 1))], ',', 1),
     split_part(g[1 + (abs(hashtext(new.id::text)) % array_length(g, 1))], ',', 2)
   );
@@ -628,8 +656,12 @@ create index if not exists buy_requests_city_idx on public.buy_requests (city);
 revoke select on public.profiles from anon, authenticated;
 grant select (id, name, role, area, joined_at, avatar_from, avatar_to, verified,
              bio, rating, reviews_count, response_mins, banned,
-             city, state, country, lat, lng, is_demo)
+             city, state, country, lat, lng, is_demo, username)
   on public.profiles to anon, authenticated;
+
+-- username can be changed by its owner (profile edit). On projects where UPDATE
+-- is granted per-column, make sure the username column is included.
+grant update (username) on public.profiles to anon, authenticated;
 
 create or replace function public.my_private_profile()
 returns table (id uuid, email text, phone text)
