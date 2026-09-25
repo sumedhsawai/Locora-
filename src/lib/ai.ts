@@ -52,6 +52,11 @@ const PRODUCT_KEYWORDS: Partial<Record<ProductCategory, string[]>> = {
   sports: ["bicycle", "cycle", "treadmill", "dumbbell", "racket", "racquet", "bat", "cricket", "badminton", "gym"],
   books: ["book", "books", "novel", "upsc", "neet", "jee", "textbook", "guide", "notes"],
   music: ["guitar", "keyboard", "piano", "violin", "tabla", "harmonium", "drums", "flute", "ukelele", "ukulele"],
+  kitchen: ["cookware", "utensils", "pressure cooker", "casserole", "dinner set", "kitchen", "gas stove", "mixer", "blender", "crockery"],
+  kids: ["kids", "baby", "stroller", "pram", "toys", "toy", "lego", "crib", "cradle", "kids cycle", "baby clothes"],
+  pets: ["pet", "dog", "cat", "aquarium", "fish tank", "bird cage", "kennel", "pet food", "cat tree"],
+  gaming: ["gaming", "ps5", "ps4", "xbox", "nintendo", "switch", "gaming pc", "gaming laptop", "controller", "gaming chair"],
+  decor: ["decor", "painting", "artwork", "vase", "curtain", "lamp", "mirror", "wall art", "showpiece", "candle stand"],
 };
 
 const SERVICE_KEYWORDS: Partial<Record<ServiceCategory, string[]>> = {
@@ -67,6 +72,13 @@ const SERVICE_KEYWORDS: Partial<Record<ServiceCategory, string[]>> = {
   cook: ["cook", "tiffin", "chef", "khana", "maharashtrian food", "home food"],
   painter: ["painter", "painting", "paint", "emulsion", "waterproofing", "wall paint"],
   yoga: ["yoga", "meditation", "pilates", "personal trainer", "fitness trainer", "zumba"],
+  carpenter: ["carpenter", "carpentry", "woodwork", "wood work", "furniture repair", "door repair", "modular wardrobe", "bed repair"],
+  tailor: ["tailor", "stitching", "alteration", "blouse", "suit stitching", "sewing", "clothes repair", "zip repair"],
+  beauty: ["salon", "beautician", "haircut at home", "facial", "makeup artist", "bridal makeup", "waxing", "spa at home", "nails"],
+  movers: ["packers", "movers", "shifting", "relocation", "moving house", "transport service", "house shifting"],
+  driver: ["driver", "chauffeur", "tempo traveller", "car rental", "self drive", "cab driver", "outstation driver"],
+  event: ["event planner", "party planner", "catering", "decorator for event", "birthday planner", "wedding planner", "tent", "sound system"],
+  other: ["service", "professional", "expert", "technician"],
 };
 
 function detectArea(q: string): string | undefined {

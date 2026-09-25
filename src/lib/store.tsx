@@ -57,6 +57,7 @@ type Action =
   | { type: "UPDATE_REQUEST"; id: string; patch: Partial<BuyRequest> }
   | { type: "DELETE_REQUEST"; id: string }
   | { type: "REMOVE_SERVICE"; id: string }
+  | { type: "UPDATE_SERVICE"; id: string; patch: Partial<Service> }
   | { type: "ADD_REVIEW"; review: Review }
   | { type: "ADD_REPORT"; report: Report }
   | { type: "SET_REPORT_STATUS"; id: string; status: Report["status"] }
@@ -169,6 +170,11 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, requests: state.requests.filter((r) => r.id !== action.id) };
     case "REMOVE_SERVICE":
       return { ...state, services: state.services.filter((s) => s.id !== action.id) };
+    case "UPDATE_SERVICE":
+      return {
+        ...state,
+        services: state.services.map((s) => (s.id === action.id ? { ...s, ...action.patch } : s)),
+      };
     case "ADD_REVIEW":
       return { ...state, reviews: [action.review, ...state.reviews] };
     case "ADD_REPORT":
@@ -304,7 +310,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   );
 
   const notify = React.useCallback((n: Omit<AppNotification, "id" | "at" | "read">) => {
-    dispatch({ type: "ADD_NOTIFICATION", notification: { ...n, id: uid("n"), at: new Date().toISOString(), read: false } });
+    // uuid ids in real mode — the notifications table needs them to persist
+    const id = REAL_MODE && typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID()
+      : uid("n");
+    dispatch({ type: "ADD_NOTIFICATION", notification: { ...n, id, at: new Date().toISOString(), read: false } });
   }, []);
 
   const value = React.useMemo<AppContextValue>(

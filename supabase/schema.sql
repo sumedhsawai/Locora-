@@ -477,6 +477,10 @@ create index if not exists notifications_user_idx on public.notifications (user_
 
 alter table public.notifications enable row level security;
 
+drop policy if exists "users create own notifications" on public.notifications;
+create policy "users create own notifications"
+  on public.notifications for insert with check (auth.uid() = user_id);
+
 drop policy if exists "users see own notifications" on public.notifications;
 create policy "users see own notifications"
   on public.notifications for select using (auth.uid() = user_id);

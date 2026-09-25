@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft, BadgeCheck, Clock, Eye, Flag, FlaskConical, Heart, MapPin, MessageCircle, IndianRupee,
-  Share2, ShieldAlert, ShieldCheck, Sparkles, Trash2, TrendingDown, TrendingUp, UserCheck,
+  Pencil, Share2, ShieldAlert, ShieldCheck, Sparkles, Trash2, TrendingDown, TrendingUp, UserCheck,
 } from "lucide-react";
 import { ListingCard } from "@/components/cards";
 import { Avatar, Badge, Button, DemoBadge, Modal, RatingStars, Skeleton } from "@/components/ui";
@@ -398,6 +398,11 @@ export default function ProductPage() {
                 <p className="flex items-center gap-1.5 text-[12.5px] font-bold text-ink-400">
                   <UserCheck size={14} /> You are the seller
                 </p>
+                <Link href={`/create/listing?edit=${product.id}`} className="block">
+                  <Button variant="secondary" className="w-full">
+                    <Pencil size={15} /> Edit listing
+                  </Button>
+                </Link>
                 <Button
                   className="w-full"
                   variant={product.status === "active" ? "secondary" : "primary"}

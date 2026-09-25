@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft, CheckCircle2, IndianRupee, ShieldAlert, ShieldCheck, Sparkles, Wand2,
 } from "lucide-react";
@@ -19,7 +19,7 @@ import {
   type ListingDraft, type PriceSuggestion, type ScamCheck,
 } from "@/lib/ai";
 import { uid, useApp, useToast } from "@/lib/store";
-import type { Condition, Product, ProductCategory } from "@/lib/types";
+import type { Condition, PriceCheckLabel, Product, ProductCategory } from "@/lib/types";
 
 const CONDITIONS: { id: Condition; label: string; hint: string }[] = [
   { id: "new", label: "Brand new", hint: "Unused, sealed" },
@@ -29,7 +29,17 @@ const CONDITIONS: { id: Condition; label: string; hint: string }[] = [
 ];
 
 export default function CreateListingPage() {
+  return (
+    <React.Suspense fallback={<Skeleton className="mx-auto mt-10 h-96 max-w-2xl rounded-3xl" />}>
+      <CreateListingInner />
+    </React.Suspense>
+  );
+}
+
+function CreateListingInner() {
   const router = useRouter();
+  const params = useSearchParams();
+  const editId = params.get("edit");
   const { state, hydrated, currentUser, dispatch, notify } = useApp();
   const { push } = useToast();
 
@@ -64,6 +74,25 @@ export default function CreateListingPage() {
   React.useEffect(() => {
     if (state.browseLocation) setLocation(state.browseLocation);
   }, [state.browseLocation]);
+
+  /* -------- edit mode: prefill from the existing listing -------- */
+  const editing = editId ? state.products.find((p) => p.id === editId && p.sellerId === currentUser?.id) : undefined;
+  const prefilled = React.useRef(false);
+  React.useEffect(() => {
+    if (!editing || prefilled.current) return;
+    prefilled.current = true;
+    setCategory(editing.category);
+    setCondition(editing.condition);
+    setAgeYears(editing.ageYears ?? 1);
+    setTitle(editing.title);
+    setDescription(editing.description);
+    setTags(editing.aiTags);
+    setPrice(String(editing.price));
+    setNegotiable(editing.negotiable);
+    setArea(editing.area);
+    if (editing.location) setLocation(editing.location);
+    setImages(editing.images);
+  }, [editing]);
 
   /* -------- AI listing generator -------- */
   const runAi = async () => {
@@ -131,9 +160,7 @@ export default function CreateListingPage() {
     const id = REAL_MODE && typeof crypto !== "undefined" && "randomUUID" in crypto
       ? crypto.randomUUID()
       : uid("p");
-    const product: Product = {
-      id,
-      sellerId: currentUser.id,
+    const shared = {
       title: title.trim(),
       description: description.trim(),
       price: p,
@@ -144,14 +171,27 @@ export default function CreateListingPage() {
       images,
       area: location && !isPune(location) ? location.city : area,
       location: location ?? areaLocation(area),
+      aiTags: tags,
+      priceCheck: suggestion
+        ? { label: suggestion.verdict.label as PriceCheckLabel, deltaPct: suggestion.verdict.deltaPct, comparables: suggestion.comparables.length || 6 }
+        : { label: "fair" as PriceCheckLabel, deltaPct: 0, comparables: 6 },
+    };
+
+    if (editing) {
+      dispatch({ type: "UPDATE_PRODUCT", id: editing.id, patch: shared });
+      push({ kind: "success", title: "Listing updated ✓", body: "Your changes are live" });
+      router.push(`/product/${editing.id}`);
+      return;
+    }
+
+    const product: Product = {
+      id,
+      sellerId: currentUser.id,
       createdAt: new Date().toISOString(),
       views: 1,
       favorites: 0,
       status: "active",
-      aiTags: tags,
-      priceCheck: suggestion
-        ? { label: suggestion.verdict.label, deltaPct: suggestion.verdict.deltaPct, comparables: suggestion.comparables.length || 6 }
-        : { label: "fair", deltaPct: 0, comparables: 6 },
+      ...shared,
     };
     dispatch({ type: "ADD_PRODUCT", product });
     notify({
@@ -199,9 +239,13 @@ export default function CreateListingPage() {
         <Link href="/create" className="inline-flex items-center gap-1.5 text-[13px] font-bold text-ink-400 transition hover:text-ink-700">
           <ArrowLeft size={14} /> Posting options
         </Link>
-        <h1 className="mt-3 text-[26px] font-extrabold tracking-tight text-ink-900">Post your ad</h1>
+        <h1 className="mt-3 text-[26px] font-extrabold tracking-tight text-ink-900">
+          {editing ? "Edit your listing" : "Post your ad"}
+        </h1>
         <p className="mt-1 text-[14px] text-ink-500">
-          Describe it in your words — Locora AI turns it into a polished listing.
+          {editing
+            ? "Update anything — photos, price, description. Changes go live instantly."
+            : "Describe it in your words — Locora AI turns it into a polished listing."}
         </p>
       </div>
 
@@ -227,7 +271,7 @@ export default function CreateListingPage() {
               className="w-full appearance-none rounded-xl bg-stone-50 px-3 py-2.5 text-[13.5px] font-semibold outline-none ring-1 ring-stone-200 focus:ring-2 focus:ring-brand-500"
             >
               <option value="">Select…</option>
-              {PRODUCT_CATEGORIES.filter((c) => c.id !== "other").map((c) => (
+              {PRODUCT_CATEGORIES.map((c) => (
                 <option key={c.id} value={c.id}>{c.emoji} {c.label}</option>
               ))}
             </select>
@@ -461,7 +505,7 @@ export default function CreateListingPage() {
       {/* ---------- publish ---------- */}
       <div className="animate-fade-up flex flex-col items-center gap-3 pb-4" style={{ animationDelay: ".3s" }}>
         <Button size="lg" className="w-full sm:w-auto sm:px-14" onClick={publish} loading={publishing}>
-          <ShieldCheck size={17} /> Publish ad
+          <ShieldCheck size={17} /> {editing ? "Save changes" : "Publish ad"}
         </Button>
         <p className="flex items-center gap-1.5 text-[12px] font-semibold text-ink-400">
           <ShieldCheck size={13} className="text-brand-600" /> AI scam shield runs before your ad goes live

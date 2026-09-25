@@ -14,6 +14,11 @@ export const PRODUCT_CATEGORIES: { id: ProductCategory; label: string; emoji: st
   { id: "sports", label: "Sports & Fitness", emoji: "🏸" },
   { id: "books", label: "Books", emoji: "📚" },
   { id: "music", label: "Music", emoji: "🎸" },
+  { id: "kitchen", label: "Kitchen & Dining", emoji: "🍳" },
+  { id: "kids", label: "Kids & Toys", emoji: "🧸" },
+  { id: "pets", label: "Pet Supplies", emoji: "🐾" },
+  { id: "gaming", label: "Gaming", emoji: "🎮" },
+  { id: "decor", label: "Home Decor", emoji: "🕯️" },
   { id: "other", label: "Other", emoji: "📦" },
 ];
 
@@ -30,6 +35,13 @@ export const SERVICE_CATEGORIES: { id: ServiceCategory; label: string; emoji: st
   { id: "cook", label: "Cooks & Tiffins", emoji: "🍲" },
   { id: "painter", label: "Painters", emoji: "🎨" },
   { id: "yoga", label: "Yoga & Fitness", emoji: "🧘" },
+  { id: "carpenter", label: "Carpenters", emoji: "🪚" },
+  { id: "tailor", label: "Tailors & Stitching", emoji: "🧵" },
+  { id: "beauty", label: "Beauty & Salon", emoji: "💅" },
+  { id: "movers", label: "Packers & Movers", emoji: "📦" },
+  { id: "driver", label: "Drivers & Rentals", emoji: "🚗" },
+  { id: "event", label: "Events & Parties", emoji: "🎉" },
+  { id: "other", label: "Other Services", emoji: "🧰" },
 ];
 
 export function productCategoryLabel(id: string): string {

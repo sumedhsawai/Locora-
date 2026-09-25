@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, CheckCircle2, IndianRupee, ShieldCheck, Sparkles, Wand2 } from "lucide-react";
 import { PhotoPicker, PhotoStrip, usePhotoLibrary, usePhotoUpload } from "@/components/photo-picker";
 import { Badge, Button, Skeleton, TypingDots } from "@/components/ui";
@@ -28,7 +28,17 @@ const UNITS: { id: Service["priceUnit"]; label: string }[] = [
 ];
 
 export default function CreateServicePage() {
+  return (
+    <React.Suspense fallback={<Skeleton className="mx-auto mt-10 h-96 max-w-2xl rounded-3xl" />}>
+      <CreateServiceInner />
+    </React.Suspense>
+  );
+}
+
+function CreateServiceInner() {
   const router = useRouter();
+  const params = useSearchParams();
+  const editId = params.get("edit");
   const { state, hydrated, currentUser, dispatch, notify } = useApp();
   const { push } = useToast();
 
@@ -62,6 +72,31 @@ export default function CreateServicePage() {
   React.useEffect(() => {
     if (state.browseLocation) setLocation(state.browseLocation);
   }, [state.browseLocation]);
+
+  /* -------- edit mode: prefill from the existing service -------- */
+  const editing = editId ? state.services.find((s) => s.id === editId && s.providerId === currentUser?.id) : undefined;
+  const prefilled = React.useRef(false);
+  React.useEffect(() => {
+    if (!editing || prefilled.current) return;
+    prefilled.current = true;
+    setTrade(editing.category);
+    setYears(editing.experienceYears);
+    setArea(editing.area);
+    if (editing.location) setLocation(editing.location);
+    setRadius(editing.radiusKm);
+    setTitle(editing.title);
+    setTagline(editing.tagline);
+    setBio(editing.description);
+    setSkills(editing.skills);
+    setStartingPrice(String(editing.startingPrice));
+    setPriceUnit(editing.priceUnit);
+    const d0 = editing.availability?.[0] ?? "";
+    if (d0 === "Mon – Sun") setDays([...DAYS]);
+    else if (!d0 || d0 === "On request") setDays([]);
+    else setDays(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
+    if (editing.availability?.[1] && editing.availability[1] !== "On request") setHours(editing.availability[1]);
+    setImages(editing.images);
+  }, [editing]);
 
   const runAi = async () => {
     if (!trade) {
@@ -102,9 +137,7 @@ export default function CreateServicePage() {
         : uid("s");
       const daysLabel =
         days.length === 7 ? "Mon – Sun" : days.length ? `${days[0]} – ${days[days.length - 1]}` : "On request";
-      const service: Service = {
-        id,
-        providerId: currentUser.id,
+      const shared = {
         title: title.trim(),
         category: trade as ServiceCategory,
         tagline: tagline.trim() || "Reliable work, honest pricing.",
@@ -115,15 +148,28 @@ export default function CreateServicePage() {
         location: location ?? areaLocation(area),
         radiusKm: radius,
         images,
+        experienceYears: years,
+        availability: [daysLabel, hours || "On request"],
+        skills: skills.length ? skills : ["General jobs"],
+      };
+
+      if (editing) {
+        dispatch({ type: "UPDATE_SERVICE", id: editing.id, patch: shared });
+        push({ kind: "success", title: "Service updated ✓", body: "Your changes are live" });
+        router.push(`/service/${editing.id}`);
+        return;
+      }
+
+      const service: Service = {
+        id,
+        providerId: currentUser.id,
         rating: 0,
         reviewsCount: 0,
         jobsDone: 0,
         responseMins: 15,
-        experienceYears: years,
-        availability: [daysLabel, hours || "On request"],
-        skills: skills.length ? skills : ["General jobs"],
         verified: false,
         createdAt: new Date().toISOString(),
+        ...shared,
       };
       dispatch({ type: "ADD_SERVICE", service });
       notify({
@@ -145,9 +191,13 @@ export default function CreateServicePage() {
         <Link href="/create" className="inline-flex items-center gap-1.5 text-[13px] font-bold text-ink-400 transition hover:text-ink-700">
           <ArrowLeft size={14} /> Posting options
         </Link>
-        <h1 className="mt-3 text-[26px] font-extrabold tracking-tight text-ink-900">Create your service profile</h1>
+        <h1 className="mt-3 text-[26px] font-extrabold tracking-tight text-ink-900">
+          {editing ? "Edit your service profile" : "Create your service profile"}
+        </h1>
         <p className="mt-1 text-[14px] text-ink-500">
-          Tell us your trade — AI writes a profile neighbours trust.
+          {editing
+            ? "Update your trade, pricing, photos or availability — changes go live instantly."
+            : "Tell us your trade — AI writes a profile neighbours trust."}
         </p>
       </div>
 
@@ -366,7 +416,7 @@ export default function CreateServicePage() {
 
       <div className="animate-fade-up flex flex-col items-center gap-3 pb-4" style={{ animationDelay: ".25s" }}>
         <Button size="lg" className="w-full sm:w-auto sm:px-14" onClick={publish} loading={publishing}>
-          <ShieldCheck size={17} /> Publish service profile
+          <ShieldCheck size={17} /> {editing ? "Save changes" : "Publish service profile"}
         </Button>
         <p className="text-[12px] font-semibold text-ink-400">
           Tip: profiles with work photos get 3× more quote requests

@@ -177,7 +177,7 @@ function rowToReview(r: ReviewRow, users: User[]): Review {
 
 /** Load the signed-in user's world from the database into AppState. */
 export async function hydrateAll(sb: Sb, sessionUserId: string): Promise<Partial<AppState> | null> {
-  const [proRes, prodRes, svcRes, reqRes, revRes, favRes, conRes, meRes, adminRes] = await Promise.all([
+  const [proRes, prodRes, svcRes, reqRes, revRes, favRes, conRes, meRes, adminRes, notifRes] = await Promise.all([
     sb.from("profiles").select(PROFILE_COLUMNS).order("joined_at", { ascending: true }),
     sb.from("products").select("*").order("created_at", { ascending: false }),
     sb.from("services").select("*").order("created_at", { ascending: false }),
@@ -189,6 +189,7 @@ export async function hydrateAll(sb: Sb, sessionUserId: string): Promise<Partial
     // contacts through RPCs: own row for everyone, all rows for admins.
     sb.rpc("my_private_profile"),
     sb.rpc("admin_profiles"),
+    sb.from("notifications").select("*").eq("user_id", sessionUserId).order("at", { ascending: false }).limit(30),
   ]);
 
   type ContactRow = { id: string; email: string | null; phone: string | null };
@@ -238,6 +239,15 @@ export async function hydrateAll(sb: Sb, sessionUserId: string): Promise<Partial
     reviews: ((revRes.data ?? []) as ReviewRow[]).map((r) => rowToReview(r, users)),
     favorites: ((favRes.data ?? []) as { product_id: string }[]).map((f) => f.product_id),
     conversations: hydratedConversations,
+    notifications: ((notifRes.data ?? []) as {
+      id: string; kind: string; title: string; body: string | null;
+      at: string; read: boolean; href: string | null;
+    }[]).map((n) => ({
+      id: n.id,
+      kind: (["match", "message", "price", "system", "review"].includes(n.kind) ? n.kind : "system") as
+        "match" | "message" | "price" | "system" | "review",
+      title: n.title, body: n.body ?? "", at: n.at, read: n.read, href: n.href ?? undefined,
+    })),
   };
 }
 
@@ -290,8 +300,43 @@ export function mirrorAction(
       if (patch.price !== undefined) row.price = patch.price;
       if (patch.description !== undefined) row.description = patch.description;
       if (patch.negotiable !== undefined) row.negotiable = patch.negotiable;
+      if (patch.category !== undefined) row.category = patch.category;
+      if (patch.condition !== undefined) row.condition = patch.condition;
+      if (patch.ageYears !== undefined) row.age_years = patch.ageYears;
+      if (patch.images !== undefined) row.images = patch.images;
+      if (patch.aiTags !== undefined) row.ai_tags = patch.aiTags;
+      if (patch.priceCheck !== undefined) row.price_check = patch.priceCheck;
+      if (patch.attributes !== undefined) row.attributes = patch.attributes;
+      if (patch.area !== undefined || patch.location !== undefined) {
+        const loc = patch.location ?? areaLocation(patch.area ?? "viman");
+        Object.assign(row, locOrNull(loc));
+        if (patch.area !== undefined) row.area = patch.area;
+      }
       if (Object.keys(row).length)
         void sb.from("products").update(row).eq("id", action.id as string).then(done("product update"));
+      break;
+    }
+    case "UPDATE_SERVICE": {
+      const patch = action.patch as Partial<Service>;
+      const row: Record<string, unknown> = {};
+      if (patch.title !== undefined) row.title = patch.title;
+      if (patch.category !== undefined) row.category = patch.category;
+      if (patch.tagline !== undefined) row.tagline = patch.tagline;
+      if (patch.description !== undefined) row.description = patch.description;
+      if (patch.startingPrice !== undefined) row.starting_price = patch.startingPrice;
+      if (patch.priceUnit !== undefined) row.price_unit = patch.priceUnit;
+      if (patch.radiusKm !== undefined) row.radius_km = patch.radiusKm;
+      if (patch.images !== undefined) row.images = patch.images;
+      if (patch.experienceYears !== undefined) row.experience_years = patch.experienceYears;
+      if (patch.availability !== undefined) row.availability = patch.availability;
+      if (patch.skills !== undefined) row.skills = patch.skills;
+      if (patch.area !== undefined || patch.location !== undefined) {
+        const loc = patch.location ?? areaLocation(patch.area ?? "viman");
+        Object.assign(row, locOrNull(loc));
+        if (patch.area !== undefined) row.area = patch.area;
+      }
+      if (Object.keys(row).length)
+        void sb.from("services").update(row).eq("id", action.id as string).then(done("service update"));
       break;
     }
     case "REMOVE_PRODUCT":
@@ -420,10 +465,16 @@ export function mirrorAction(
       break;
     }
     case "ADD_NOTIFICATION": {
-      const n = action.notification as { id: string; title: string; body: string; at: string; icon: string };
+      const n = action.notification as {
+        id: string; kind: "match" | "message" | "price" | "system" | "review";
+        title: string; body: string; at: string; href?: string;
+      };
       void sb
         .from("notifications")
-        .insert({ id: n.id, user_id: me, kind: "chat", title: n.title, body: n.body, at: n.at, read: false })
+        .insert({
+          id: n.id, user_id: me, kind: n.kind, title: n.title,
+          body: n.body ?? "", at: n.at, read: false, href: n.href ?? null,
+        })
         .then(done("notification"));
       break;
     }

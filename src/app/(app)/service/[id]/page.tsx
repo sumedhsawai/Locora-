@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
   BadgeCheck, CalendarCheck, CheckCircle2, Clock, Flag, FlaskConical, IndianRupee, MapPin,
-  MessageCircle, Share2, Sparkles, Star, Wrench,
+  MessageCircle, Pencil, Share2, Sparkles, Star, Trash2, Wrench,
 } from "lucide-react";
 import { ServiceCard } from "@/components/cards";
 import { Avatar, Badge, Button, DemoBadge, Modal, RatingStars, Skeleton } from "@/components/ui";
@@ -24,6 +24,7 @@ export default function ServicePage() {
   const { push } = useToast();
 
   const [reportOpen, setReportOpen] = React.useState(false);
+  const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [reportReason, setReportReason] = React.useState(REPORT_REASONS[0]!);
   const [reportDetails, setReportDetails] = React.useState("");
 
@@ -285,8 +286,18 @@ export default function ServicePage() {
             </p>
             <p className="mt-1 text-[12px] font-medium text-ink-400">Final quote depends on the job — discuss in chat.</p>
             {isMine ? (
-              <div className="mt-4 rounded-xl bg-brand-50 px-4 py-3 text-center text-[13px] font-bold text-brand-700 ring-1 ring-brand-100">
-                This is your service profile ✓
+              <div className="mt-4 space-y-2.5">
+                <div className="rounded-xl bg-brand-50 px-4 py-3 text-center text-[13px] font-bold text-brand-700 ring-1 ring-brand-100">
+                  This is your service profile ✓
+                </div>
+                <Link href={`/create-service?edit=${service.id}`} className="block">
+                  <Button variant="secondary" className="w-full">
+                    <Pencil size={15} /> Edit service
+                  </Button>
+                </Link>
+                <Button variant="ghost" className="w-full !text-rose-600" onClick={() => setDeleteOpen(true)}>
+                  <Trash2 size={15} /> Delete service profile
+                </Button>
               </div>
             ) : service.isDemo || provider?.isDemo ? (
               <>
@@ -394,6 +405,28 @@ export default function ServicePage() {
       )}
 
       {/* report modal */}
+      <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} className="max-w-sm">
+        <h3 className="text-[17px] font-extrabold text-ink-900">Delete this service profile?</h3>
+        <p className="mt-2 text-[13px] leading-relaxed text-ink-500">
+          “{service.title}” will be removed from Locora and neighbours won&apos;t be able to find
+          you for {serviceCategoryLabel(service.category).toLowerCase()} jobs anymore. This
+          can&apos;t be undone.
+        </p>
+        <div className="mt-5 flex justify-end gap-2.5">
+          <Button variant="secondary" onClick={() => setDeleteOpen(false)}>Keep it</Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              dispatch({ type: "REMOVE_SERVICE", id: service.id });
+              push({ kind: "success", title: "Service profile deleted" });
+              router.push("/profile");
+            }}
+          >
+            <Trash2 size={15} /> Delete
+          </Button>
+        </div>
+      </Modal>
+
       <Modal open={reportOpen} onClose={() => setReportOpen(false)}>
         <h2 className="text-[17px] font-extrabold text-ink-900">Report this provider</h2>
         <p className="mt-1 text-[13px] text-ink-500">Reports go to Locora AI and the moderation team.</p>

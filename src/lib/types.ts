@@ -25,6 +25,11 @@ export type ProductCategory =
   | "sports"
   | "books"
   | "music"
+  | "kitchen"
+  | "kids"
+  | "pets"
+  | "gaming"
+  | "decor"
   | "other";
 
 export type ServiceCategory =
@@ -39,7 +44,14 @@ export type ServiceCategory =
   | "pest-control"
   | "cook"
   | "painter"
-  | "yoga";
+  | "yoga"
+  | "carpenter"
+  | "tailor"
+  | "beauty"
+  | "movers"
+  | "driver"
+  | "event"
+  | "other";
 
 export type Condition = "new" | "like-new" | "good" | "fair";
 export type PriceCheckLabel = "great" | "fair" | "high";
