@@ -148,8 +148,14 @@ export default function ProductPage() {
     .sort((a, b) => distanceBetweenAreas(myArea, a.area) - distanceBetweenAreas(myArea, b.area))
     .slice(0, 4);
 
+  const needAuth = (what: string) => {
+    push({ kind: "info", title: `Sign in to ${what}`, body: "It takes 30 seconds — email or Google." });
+    router.push(`/login?next=${encodeURIComponent(`/product/${product.id}`)}`);
+  };
+
   const openChat = () => {
-    if (!currentUser || !seller) return;
+    if (!currentUser) return needAuth("chat with sellers");
+    if (!seller) return;
     if (seller.id === currentUser.id) {
       push({ kind: "info", title: "This is your own listing 😄" });
       return;
@@ -165,7 +171,8 @@ export default function ProductPage() {
   };
 
   const sendOffer = () => {
-    if (!currentUser || !seller) return;
+    if (!currentUser) return needAuth("make offers");
+    if (!seller) return;
     const amount = parseInt(offerAmount.replace(/[^\d]/g, ""), 10);
     if (!amount || amount < 100) {
       push({ kind: "error", title: "Enter a valid offer amount" });
@@ -198,6 +205,7 @@ export default function ProductPage() {
   };
 
   const submitReport = () => {
+    if (!currentUser) return needAuth("report listings");
     dispatch({
       type: "ADD_REPORT",
       report: {
@@ -389,12 +397,17 @@ export default function ProductPage() {
         <aside className="space-y-5 lg:sticky lg:top-24 lg:self-start">
           {/* actions card */}
           <div className="rounded-2xl bg-white p-5 shadow-card ring-1 ring-stone-100/70">
-            {product.status === "sold" ? (
+            {product.status === "sold" && !isMine ? (
               <div className="rounded-xl bg-stone-100 py-3.5 text-center text-[14px] font-extrabold uppercase tracking-wide text-ink-400">
                 Sold
               </div>
             ) : isMine ? (
               <div className="space-y-2.5">
+                {product.status === "sold" && (
+                  <div className="rounded-xl bg-stone-100 py-3 text-center text-[13px] font-extrabold uppercase tracking-wide text-ink-400">
+                    Sold — reactivate to relist it
+                  </div>
+                )}
                 <p className="flex items-center gap-1.5 text-[12.5px] font-bold text-ink-400">
                   <UserCheck size={14} /> You are the seller
                 </p>
@@ -444,7 +457,14 @@ export default function ProductPage() {
                   </p>
                 )}
                 <div className="grid grid-cols-3 gap-2">
-                  <Button variant="secondary" onClick={() => dispatch({ type: "TOGGLE_FAVORITE", productId: product.id })} className={favorited ? "!text-rose-600 !ring-rose-200" : ""}>
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      if (!currentUser) return needAuth("save favourites");
+                      dispatch({ type: "TOGGLE_FAVORITE", productId: product.id });
+                    }}
+                    className={favorited ? "!text-rose-600 !ring-rose-200" : ""}
+                  >
                     <Heart size={15} fill={favorited ? "currentColor" : "none"} /> {favorited ? "Saved" : "Save"}
                   </Button>
                   <Button variant="secondary" onClick={share}>

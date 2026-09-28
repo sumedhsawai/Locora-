@@ -68,8 +68,14 @@ export default function ServicePage() {
     .sort((a, b) => distanceBetweenAreas(myArea, a.area) - distanceBetweenAreas(myArea, b.area))
     .slice(0, 4);
 
+  const needAuth = (what: string) => {
+    push({ kind: "info", title: `Sign in to ${what}`, body: "It takes 30 seconds — email or Google." });
+    router.push(`/login?next=${encodeURIComponent(`/service/${service.id}`)}`);
+  };
+
   const getQuote = () => {
-    if (!currentUser || !provider) return;
+    if (!currentUser) return needAuth("get quotes");
+    if (!provider) return;
     if (provider.id === currentUser.id) {
       push({ kind: "info", title: "This is your own service profile 😄" });
       return;
@@ -85,6 +91,7 @@ export default function ServicePage() {
   };
 
   const submitReport = () => {
+    if (!currentUser) return needAuth("report services");
     dispatch({
       type: "ADD_REPORT",
       report: {

@@ -94,7 +94,7 @@ export default function HomePage() {
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-[24px] font-extrabold tracking-tight text-ink-900 sm:text-[27px]">
-              {greeting()}, {currentUser?.name.split(" ")[0]} 👋
+              {currentUser ? `${greeting()}, ${currentUser.name.split(" ")[0]}` : "Welcome to Locora"} 👋
             </h1>
             <p className="mt-1 flex flex-wrap items-center gap-1.5 text-[13.5px] font-medium text-ink-500">
               <MapPin size={14} className="text-brand-600" />

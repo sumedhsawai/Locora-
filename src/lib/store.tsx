@@ -30,6 +30,12 @@ const STORAGE_KEY = "locora:state:v" + SEED_VERSION;
 
 let uidCounter = 0;
 export function uid(prefix: string): string {
+  // In real mode these ids land in Postgres uuid columns (messages, reviews,
+  // reports…) — always mint a real uuid there. The prefix only matters for
+  // mock/demo mode where ids live in localStorage.
+  if (REAL_MODE && typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
   uidCounter += 1;
   return `${prefix}_${Date.now().toString(36)}${uidCounter.toString(36)}`;
 }

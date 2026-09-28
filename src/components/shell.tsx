@@ -8,7 +8,7 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Bell, Check, ChevronDown, Globe2, Home, LogOut, MapPin, Megaphone, MessageCircle, Plus,
+  Bell, Check, ChevronDown, Globe2, Home, LogIn, LogOut, MapPin, Megaphone, MessageCircle, Plus,
   Search, ShieldCheck, Sparkles, TrendingDown, User as UserIcon,
 } from "lucide-react";
 import { Logo } from "@/components/brand";
@@ -77,6 +77,9 @@ function NotificationsMenu() {
   const { state, dispatch } = useApp();
   const router = useRouter();
   const unread = state.notifications.filter((n) => !n.read).length;
+
+  // guests have no notifications (and no bell — keeps the mobile navbar slim)
+  if (!state.sessionUserId) return null;
 
   return (
     <Dropdown
@@ -168,7 +171,7 @@ function AreaPicker({ compact = false }: { compact?: boolean }) {
         title="Change city"
       >
         <MapPin size={compact ? 13 : 15} className="text-brand-600" />
-        <span className="max-w-[150px] truncate">{placeLabel(loc)}</span>
+        <span className={compact ? "max-w-[90px] truncate sm:max-w-[150px]" : "max-w-[150px] truncate"}>{placeLabel(loc)}</span>
       </button>
     );
   }
@@ -186,7 +189,11 @@ function AreaPicker({ compact = false }: { compact?: boolean }) {
           }
         >
           <MapPin size={compact ? 13 : 15} className="text-brand-600" />
-          <span className="max-w-[130px] truncate">{current === "all" ? `All of ${CITY}` : areaName(current)}</span>
+          {/* compact (mobile header): short label + tight cap so the navbar never
+              overflows on 360px screens; full label on desktop */}
+          <span className={compact ? "max-w-[90px] truncate sm:max-w-[130px]" : "max-w-[130px] truncate"}>
+            {current === "all" ? (compact ? CITY : `All of ${CITY}`) : areaName(current)}
+          </span>
           <ChevronDown size={14} className="text-ink-400" />
         </span>
       )}
@@ -233,7 +240,15 @@ function AreaPicker({ compact = false }: { compact?: boolean }) {
 function AvatarMenu() {
   const { currentUser, dispatch } = useApp();
   const router = useRouter();
-  if (!currentUser) return null;
+  if (!currentUser)
+    return (
+      <Link
+        href="/login"
+        className="inline-flex h-9 items-center gap-1.5 rounded-full bg-brand-600 px-4 text-[13px] font-bold text-white shadow-soft transition hover:bg-brand-700"
+      >
+        <LogIn size={14} /> Sign in
+      </Link>
+    );
 
   return (
     <Dropdown
@@ -299,7 +314,7 @@ export function AppNavbar() {
   const router = useRouter();
   return (
     <header className="sticky top-0 z-40 border-b border-stone-200/70 bg-white/85 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:px-6">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:gap-3 sm:px-6">
         <Logo href="/home" />
 
         {/* desktop search */}

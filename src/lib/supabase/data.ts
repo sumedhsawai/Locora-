@@ -176,20 +176,24 @@ function rowToReview(r: ReviewRow, users: User[]): Review {
 /* --------------------------- hydration ---------------------------- */
 
 /** Load the signed-in user's world from the database into AppState. */
-export async function hydrateAll(sb: Sb, sessionUserId: string): Promise<Partial<AppState> | null> {
+export async function hydrateAll(sb: Sb, sessionUserId: string | null): Promise<Partial<AppState> | null> {
+  // guests (no sessionUserId) get the public marketplace data only — the
+  // user-scoped queries (favourites, chats, contacts, notifications) are skipped
+  const me = sessionUserId ?? "";
+  const empty = Promise.resolve({ data: [] as never[] });
   const [proRes, prodRes, svcRes, reqRes, revRes, favRes, conRes, meRes, adminRes, notifRes] = await Promise.all([
     sb.from("profiles").select(PROFILE_COLUMNS).order("joined_at", { ascending: true }),
     sb.from("products").select("*").order("created_at", { ascending: false }),
     sb.from("services").select("*").order("created_at", { ascending: false }),
     sb.from("buy_requests").select("*").order("created_at", { ascending: false }),
     sb.from("reviews").select("*").order("created_at", { ascending: false }),
-    sb.from("favorites").select("product_id").eq("user_id", sessionUserId),
-    sb.from("conversations").select("*").order("updated_at", { ascending: false }),
+    me ? sb.from("favorites").select("product_id").eq("user_id", me) : empty,
+    me ? sb.from("conversations").select("*").order("updated_at", { ascending: false }) : empty,
     // email/phone are column-protected (not in the public REST grant) — fetch
     // contacts through RPCs: own row for everyone, all rows for admins.
-    sb.rpc("my_private_profile"),
-    sb.rpc("admin_profiles"),
-    sb.from("notifications").select("*").eq("user_id", sessionUserId).order("at", { ascending: false }).limit(30),
+    me ? sb.rpc("my_private_profile") : empty,
+    me ? sb.rpc("admin_profiles") : empty,
+    me ? sb.from("notifications").select("*").eq("user_id", me).order("at", { ascending: false }).limit(30) : empty,
   ]);
 
   type ContactRow = { id: string; email: string | null; phone: string | null };
@@ -260,6 +264,10 @@ type AnyAction = { type: string; [k: string]: unknown };
  * the optimistic client state already applied; failures log to console so a
  * single blocked write never breaks the UX.
  */
+// in-flight conversation upserts — ADD_MESSAGE waits on these to avoid the new-thread RLS race
+// (module-level: mirrorAction runs once per action, the pending entry must outlive each call)
+const pendingConversationUpserts = new Map<string, Promise<unknown>>();
+
 export function mirrorAction(
   sb: Sb,
   action: AnyAction,
@@ -412,29 +420,56 @@ export function mirrorAction(
     }
     case "ENSURE_CONVERSATION": {
       const c = action.conversation as Conversation;
-      void sb
+      const upsertP = sb
         .from("conversations")
         .upsert({
           id: c.id, participants: c.participants, subject: c.subject,
           updated_at: c.updatedAt, unread_for: c.unreadFor ?? [],
         })
         .then(done("conversation"));
+      // track in-flight upserts so a first message sent into the brand-new
+      // thread can wait for the row to exist before its own insert (RLS
+      // requires the conversation to be visible)
+      pendingConversationUpserts.set(c.id, Promise.resolve(upsertP).finally(() => pendingConversationUpserts.delete(c.id)));
       break;
     }
     case "ADD_MESSAGE": {
       const m = action.message as Message;
       const cid = action.conversationId as string;
       if (m.senderId !== me) return; // only my own sends persist from this client
-      void sb
-        .from("messages")
-        .insert({
-          id: m.id, conversation_id: cid, sender_id: m.senderId,
-          text: m.text, kind: m.kind, offer: m.offer ?? null, at: m.at,
-        })
-        .then(done("message"));
-      // bump the thread + flag it unread for everyone except me
       void (async () => {
         try {
+          // ordering: wait for a concurrently-dispatched ENSURE_CONVERSATION upsert
+          // (brand-new thread) to commit before inserting, else RLS rejects the message
+          await pendingConversationUpserts.get(cid);
+          // new-thread race: the ENSURE_CONVERSATION upsert for a brand-new chat is
+          // fire-and-forget and may not be committed yet when this insert lands, in
+          // which case the RLS participant check can't see the row and rejects with
+          // "new row violates row-level security". Retry briefly — it lands in ms.
+          let lastError: { message?: string } | null = null;
+          for (let attempt = 0; attempt < 7; attempt++) {
+            const res = await sb.from("messages").insert({
+              id: m.id, conversation_id: cid, sender_id: m.senderId,
+              text: m.text, kind: m.kind, offer: m.offer ?? null, at: m.at,
+            });
+            if (!res.error) {
+              lastError = null;
+              break;
+            }
+            lastError = res.error;
+            // row already written (e.g. realtime echo double-fire) → effectively a success
+            if (/duplicate key/i.test(res.error.message)) {
+              lastError = null;
+              break;
+            }
+            if (!/row-level security/i.test(res.error.message)) break;
+            await new Promise((r) => setTimeout(r, 150 * (attempt + 1)));
+          }
+          if (lastError) {
+            console.warn(`[locora] message not persisted:`, (lastError as { message?: string }).message);
+            return;
+          }
+          // bump the thread + flag it unread for everyone except me
           const { data: conv } = await sb
             .from("conversations")
             .select("participants")

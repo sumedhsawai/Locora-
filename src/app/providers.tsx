@@ -38,6 +38,12 @@ function SupabaseAuthBridge() {
           hydratedFor.current = null;
           hadSession.current = false;
         }
+        // guests still see the marketplace (public data, anon client)
+        if (hydratedFor.current !== "guest") {
+          hydratedFor.current = "guest";
+          const data = await hydrateAll(sb, null);
+          if (data && mounted) dispatch({ type: "HYDRATE_DATA", data });
+        }
         return;
       }
       hadSession.current = true;

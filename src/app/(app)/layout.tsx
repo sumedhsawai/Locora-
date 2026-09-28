@@ -19,18 +19,23 @@ function Splash() {
   );
 }
 
+/** Routes guests can browse without an account (sharing links, SEO, curiosity).
+ *  Everything else (chat, profile, requests, create, admin) still requires sign-in. */
+const PUBLIC_PREFIXES = ["/home", "/search", "/product", "/service", "/u"];
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { hydrated, currentUser } = useApp();
   const router = useRouter();
   const pathname = usePathname();
+  const isPublicPath = PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
 
   React.useEffect(() => {
-    if (hydrated && !currentUser) {
+    if (hydrated && !currentUser && !isPublicPath) {
       router.replace(`/login?next=${encodeURIComponent(pathname)}`);
     }
-  }, [hydrated, currentUser, router, pathname]);
+  }, [hydrated, currentUser, router, pathname, isPublicPath]);
 
-  if (!hydrated || !currentUser) return <Splash />;
+  if (!hydrated || (!currentUser && !isPublicPath)) return <Splash />;
 
   return (
     <div className="min-h-screen bg-stone-50">
