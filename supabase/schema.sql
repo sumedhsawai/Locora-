@@ -279,6 +279,9 @@ create table if not exists public.reviews (
 
 create index if not exists reviews_target_idx on public.reviews (target_id, created_at desc);
 
+-- one review per (author, target) — blocks repeat rating manipulation
+create unique index if not exists reviews_one_per_author_target on public.reviews (author, target_id);
+
 alter table public.reviews enable row level security;
 
 drop policy if exists "reviews are public" on public.reviews;
@@ -287,11 +290,20 @@ create policy "reviews are public"
 
 drop policy if exists "users write own reviews" on public.reviews;
 create policy "users write own reviews"
-  on public.reviews for insert with check (auth.uid() = author);
+  on public.reviews for insert with check (
+    auth.uid() = author
+    -- only review people you actually have a thread with (kills review bombing)
+    and exists (select 1 from public.conversations c where c.participants @> array[auth.uid(), target_id])
+  );
 
 drop policy if exists "authors edit own reviews" on public.reviews;
 create policy "authors edit own reviews"
-  on public.reviews for update using (auth.uid() = author or public.is_admin());
+  on public.reviews for update
+  using (auth.uid() = author or public.is_admin())
+  with check (
+    auth.uid() = author
+    and exists (select 1 from public.conversations c where c.participants @> array[auth.uid(), target_id])
+  );
 
 drop policy if exists "authors delete own reviews" on public.reviews;
 create policy "authors delete own reviews"
@@ -308,6 +320,33 @@ create table if not exists public.conversations (
 );
 
 create index if not exists conversations_participant_idx on public.conversations using gin (participants);
+
+-- Thread integrity: a canonical thread id (c:<uuid-a>:<uuid-b>:<subject>) must
+-- always hash back to its own participants. Blocks squatting a thread id that
+-- belongs to two other people (to inject messages once they start chatting)
+-- and reassigning an existing thread's participants. Demo-seed threads
+-- (c_demo_*) don't match the canonical pattern and are exempt.
+create or replace function public.guard_conversation_integrity()
+returns trigger
+language plpgsql security definer set search_path = public
+as $$
+declare expected text;
+begin
+  if new.id ~ '^c:[0-9a-f]{8}-' and not public.is_admin() then
+    select 'c:' || string_agg(x::text, ':' order by x::text) || ':' || coalesce(new.subject->>'id', '')
+      into expected
+      from unnest(new.participants) t(x);
+    if new.id is distinct from expected then
+      raise exception 'LOCORA_THREAD_MISMATCH: conversation participants do not match its id';
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists conversations_guard on public.conversations;
+create trigger conversations_guard before insert or update on public.conversations
+  for each row execute function public.guard_conversation_integrity();
 
 alter table public.conversations enable row level security;
 
@@ -668,11 +707,15 @@ grant select (id, name, role, area, joined_at, avatar_from, avatar_to, verified,
 grant update (username) on public.profiles to anon, authenticated;
 
 create or replace function public.my_private_profile()
-returns table (id uuid, email text, phone text)
+returns table (id uuid, email text, phone text, lat double precision, lng double precision)
 language sql security definer set search_path = public stable
-as $$ select p.id, p.email, p.phone from public.profiles p where p.id = auth.uid() $$;
+as $$ select p.id, p.email, p.phone, p.lat, p.lng from public.profiles p where p.id = auth.uid() $$;
 revoke all on function public.my_private_profile() from public, anon;
 grant execute on function public.my_private_profile() to authenticated;
+
+-- PII columns are never public: emails/phones/home coords are only served
+-- through the security-definer RPCs above (own row / admin rows).
+revoke select (email, phone, lat, lng) on public.profiles from anon, authenticated;
 
 create or replace function public.admin_profiles()
 returns table (id uuid, email text, phone text)

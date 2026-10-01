@@ -31,13 +31,14 @@ export interface ProfileRow {
 }
 
 /**
- * Columns the app reads from public.profiles. email/phone are intentionally
- * absent: they are PII, not included in the public SELECT grants, and come
- * through the my_private_profile / admin_profiles RPCs instead. NEVER use
- * select("*") on profiles — it 403s under the column-level grants.
+ * Columns the app reads from public.profiles. email/phone AND the home
+ * lat/lng are intentionally absent: they are PII, not included in the public
+ * SELECT grants, and come through the my_private_profile / admin_profiles
+ * RPCs instead. NEVER use select("*") on profiles — it 403s under the
+ * column-level grants.
  */
 export const PROFILE_COLUMNS =
-  "id,name,role,area,joined_at,avatar_from,avatar_to,verified,bio,rating,reviews_count,response_mins,banned,city,state,country,lat,lng,is_demo,username";
+  "id,name,role,area,joined_at,avatar_from,avatar_to,verified,bio,rating,reviews_count,response_mins,banned,city,state,country,is_demo,username";
 
 /** Map a Supabase profiles row (snake_case) → the app's User type. */
 export function profileToUser(p: ProfileRow, fallbackEmail?: string): User {
