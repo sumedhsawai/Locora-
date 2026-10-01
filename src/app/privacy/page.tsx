@@ -48,8 +48,9 @@ const SECTIONS: { title: string; body: string[] }[] = [
       "Access & portability: you can download everything we hold about you — Profile → Your data → Download my data — as a machine-readable file.",
       "Correction: you can edit your profile details any time in the app.",
       "Erasure: you can permanently delete your account and all associated data — Profile → Your data → Delete account. This removes your profile, listings, services, requests, reviews, messages and chats from our systems.",
-      "Grievance redressal: contact our Grievance Officer at privacy@locora.app — we respond within 7 working days.",
+      "Grievance redressal: contact our Grievance Officer at sumedhsawai99@gmail.com — we respond within 7 working days.",
       "Consent withdrawal: you may withdraw consent for location auto-detection any time in your profile settings; you can also delete your account to withdraw consent entirely.",
+      "If you are in the European Economic Area or the United Kingdom, you also have the right to object to or restrict processing of your data, the right to data portability, and the right to lodge a complaint with your local data protection supervisory authority. Our legal bases for processing are: performance of a contract (running your account, listings and chats), legitimate interests (keeping the marketplace safe and preventing fraud), and consent (optional location detection), which you may withdraw as described above. Your data is stored on secure cloud servers in India (Mumbai); where we transfer it outside the EEA/UK we rely on standard contractual clauses or your explicit consent.",
     ],
   },
   {
@@ -112,7 +113,7 @@ export default function PrivacyPage() {
         <div className="mt-12 rounded-2xl bg-brand-50 p-5 ring-1 ring-brand-100">
           <p className="text-[13.5px] font-semibold leading-relaxed text-brand-900">
             Questions or concerns? Write to our Grievance Officer at{" "}
-            <span className="font-extrabold">privacy@locora.app</span>. See also our{" "}
+            <span className="font-extrabold">sumedhsawai99@gmail.com</span>. See also our{" "}
             <Link href="/terms" className="underline">Terms of Service</Link>.
           </p>
         </div>

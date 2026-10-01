@@ -68,6 +68,7 @@ function LoginForm() {
   const [username, setUsername] = React.useState("");
   const [phone, setPhone] = React.useState("");
   const [unameStatus, setUnameStatus] = React.useState<"idle" | "checking" | "ok" | "taken" | "invalid">("idle");
+  const [adult, setAdult] = React.useState(false);
   const [showPw, setShowPw] = React.useState(false);
   const [error, setError] = React.useState("");
   const [notice, setNotice] = React.useState("");
@@ -238,6 +239,7 @@ function LoginForm() {
       return setError("Password reset needs the real backend — use a demo account instead.");
     }
     if (!/^\S+@\S+\.\S+$/.test(email)) return setError("Please enter a valid email address.");
+    if (mode === "signup" && !adult) return setError("Please confirm you are 18 or older to create an account.");
     if (REAL_MODE) {
       if (mode === "signin") return void realSignIn();
       if (name.trim().length < 2) return setError("Please enter your full name.");
@@ -532,6 +534,20 @@ function LoginForm() {
                     ))}
                   </div>
                 </div>
+
+                <label className="flex cursor-pointer items-start gap-2.5 rounded-xl bg-white p-3 ring-1 ring-stone-200">
+                  <input
+                    type="checkbox"
+                    checked={adult}
+                    onChange={(e) => setAdult(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600"
+                  />
+                  <span className="text-[12.5px] leading-snug text-ink-500">
+                    I confirm I am <strong className="text-ink-800">18 or older</strong> and agree to the{" "}
+                    <a href="/terms" className="font-bold text-brand-600 underline" target="_blank" rel="noreferrer">Terms</a> and{" "}
+                    <a href="/privacy" className="font-bold text-brand-600 underline" target="_blank" rel="noreferrer">Privacy Policy</a>.
+                  </span>
+                </label>
               </>
             )}
 

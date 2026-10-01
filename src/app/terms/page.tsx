@@ -23,7 +23,7 @@ const SECTIONS: { title: string; body: string[] }[] = [
     title: "3. Your content",
     body: [
       "You own the listings, photos and messages you post. You give Locora permission to store and display them for running the marketplace (e.g. showing your listing to buyers in your city). You confirm your photos are yours to post and your listings are legal and accurately described.",
-      "Prohibited: stolen goods, weapons, drugs, adult content, counterfeits, live animals, hazardous materials, or anything illegal in India. Prohibited listings are removed and repeat offenders lose their accounts.",
+      "Prohibited: stolen goods, weapons, drugs, adult content, counterfeits, live animals, hazardous materials, or anything illegal in India or in your own jurisdiction. Prohibited listings are removed and repeat offenders lose their accounts.",
     ],
   },
   {
@@ -104,7 +104,7 @@ export default function TermsPage() {
         <div className="mt-12 rounded-2xl bg-brand-50 p-5 ring-1 ring-brand-100">
           <p className="text-[13.5px] font-semibold leading-relaxed text-brand-900">
             See also our <Link href="/privacy" className="underline">Privacy Policy</Link>. For
-            anything else, contact <span className="font-extrabold">support@locora.app</span>.
+            anything else, contact <span className="font-extrabold">sumedhsawai99@gmail.com</span>.
           </p>
         </div>
       </main>
