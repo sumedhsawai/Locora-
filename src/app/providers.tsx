@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { usePathname, useRouter } from "next/navigation";
 import type { AuthChangeEvent, Session } from "@supabase/supabase-js";
 import { AppProvider, ToastProvider, useApp } from "@/lib/store";
 import { ToastViewport } from "@/components/shell";
@@ -17,6 +18,8 @@ import { RealtimeBridge } from "@/components/realtime";
  */
 function SupabaseAuthBridge() {
   const { dispatch } = useApp();
+  const router = useRouter();
+  const pathname = usePathname();
   const hydratedFor = React.useRef<string | null>(null);
   const hadSession = React.useRef(false);
 
@@ -65,6 +68,11 @@ function SupabaseAuthBridge() {
     );
 
     const { data: sub } = sb.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+      // A password-recovery link signs the user in with a one-time session —
+      // route them to the new-password form instead of the marketplace.
+      if (event === "PASSWORD_RECOVERY" && pathname !== "/reset-password") {
+        router.replace("/reset-password");
+      }
       syncSession(session);
     });
 

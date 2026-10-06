@@ -182,7 +182,7 @@ export async function sendPasswordReset(email: string) {
   const sb = supabase();
   if (!sb) throw new Error("Supabase is not configured");
   return sb.auth.resetPasswordForEmail(email.trim(), {
-    redirectTo: typeof window !== "undefined" ? `${window.location.origin}/login` : undefined,
+    redirectTo: typeof window !== "undefined" ? `${window.location.origin}/reset-password` : undefined,
   });
 }
 
