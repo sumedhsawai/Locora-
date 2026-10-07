@@ -5,10 +5,10 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight, BadgeCheck, ChevronRight, MapPin, MessageCircle, Megaphone, Search,
-  ShieldCheck, Sparkles, Star, TrendingDown,
+  ShieldCheck, Sparkles, TrendingDown,
 } from "lucide-react";
 import { Logo, LogoMark, AiPill } from "@/components/brand";
-import { CountUp, Parallax, Reveal, Tilt } from "@/components/motion";
+import { Parallax, Reveal, Tilt } from "@/components/motion";
 import Image from "next/image";
 import { Badge } from "@/components/ui";
 
@@ -223,8 +223,8 @@ const FEATURES = [
   },
   {
     icon: BadgeCheck,
-    title: "Verified locals",
-    body: "KYC-verified sellers and service providers, real reviews from neighbours, and response-time badges so you know who'll reply fast.",
+    title: "Trust, built in",
+    body: "Real reviews from neighbours, response-time badges so you know who'll reply fast, and an AI scam shield on every listing.",
     accent: "bg-brand-50 text-brand-600 ring-brand-100",
   },
   {
@@ -236,10 +236,10 @@ const FEATURES = [
 ];
 
 const STATS: { value: React.ReactNode; label: string }[] = [
-  { value: <CountUp to={18400} suffix="+" />, label: "live listings" },
-  { value: <CountUp to={6300} suffix="+" />, label: "verified locals" },
-  { value: <CountUp to={11} suffix=" min" />, label: "avg. first reply" },
-  { value: <CountUp to={190} suffix="+" />, label: "countries ready" },
+  { value: "₹0", label: "commission — free forever" },
+  { value: "5 km", label: "hyperlocal feed around you" },
+  { value: "24/7", label: "AI scam shield on listings" },
+  { value: "Any city", label: "works worldwide" },
 ];
 
 const WORLD_CITIES = [
@@ -247,30 +247,6 @@ const WORLD_CITIES = [
   "London", "Manchester", "Berlin", "Munich", "Paris", "Amsterdam",
   "New York", "San Francisco", "Austin", "Chicago", "Toronto", "Vancouver",
   "Sydney", "Melbourne", "Singapore", "Dubai", "Tokyo", "São Paulo",
-];
-
-const TESTIMONIALS = [
-  {
-    quote:
-      "Sold my sofa in two days. The AI wrote a better description than I would have, and the price suggestion was spot on — three buyers said it was 'fairly priced' in chat.",
-    name: "Omkar Bhosale",
-    detail: "Sold furniture · Baner",
-    from: "#6366F1", to: "#4338CA",
-  },
-  {
-    quote:
-      "Posted 'need a plumber today' at 9 AM. Locora matched Rohan 1.5 km away, we chatted, and the leak was fixed by lunch. This is how local should work.",
-    name: "Ishita Rao",
-    detail: "Found a plumber · Kalyani Nagar",
-    from: "#EC4899", to: "#BE185D",
-  },
-  {
-    quote:
-      "As a tutor, half my new students now come from Locora. The verified badge and parent reviews do my marketing for me.",
-    name: "Priya Desai",
-    detail: "Service provider · Baner",
-    from: "#0390E0", to: "#014093",
-  },
 ];
 
 export default function LandingPage() {
@@ -337,27 +313,11 @@ export default function LandingPage() {
             </div>
             <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3">
               <div className="flex items-center gap-2.5">
-                <div className="flex -space-x-2.5">
-                  {[
-                    ["#6366F1", "#4338CA", "SP"],
-                    ["#EC4899", "#BE185D", "IR"],
-                    ["#F59E0B", "#D97706", "RK"],
-                    ["#0390E0", "#014093", "PD"],
-                  ].map(([f, t, i]) => (
-                    <span
-                      key={i}
-                      className="flex h-8 w-8 items-center justify-center rounded-full text-[10px] font-extrabold text-white ring-2 ring-ink-950"
-                      style={{ background: `linear-gradient(135deg, ${f}, ${t})` }}
-                    >
-                      {i}
-                    </span>
-                  ))}
-                </div>
                 <div className="text-[12.5px] leading-tight text-white/60">
-                  <span className="font-bold text-white">12,400+ neighbours</span> joined
+                  <span className="font-bold text-white">Free forever</span> — no commission, no hidden fees
                   <br />
                   <span className="inline-flex items-center gap-1">
-                    <Star size={11} className="text-accent-400" fill="currentColor" /> 4.9 rated by the neighbourhood
+                    <ShieldCheck size={11} className="text-accent-400" /> Meet in person, pay after — by design
                   </span>
                 </div>
               </div>
@@ -521,7 +481,7 @@ export default function LandingPage() {
       </section>
 
       {/* -------------------------- how it works ------------------------- */}
-      <section id="how" className="border-y border-stone-200/70 bg-white py-20 sm:py-24">
+      <section id="how" className="overflow-hidden border-y border-stone-200/70 bg-white py-20 sm:py-24">
         <div className="mx-auto grid max-w-7xl items-center gap-12 px-4 sm:px-6 lg:grid-cols-2 lg:gap-16">
           <div>
             <Badge tone="amber">How it works</Badge>
@@ -538,7 +498,7 @@ export default function LandingPage() {
                 {
                   n: "02",
                   t: "Search, post or ask",
-                  d: "Buy and sell pre-loved items, hire verified services, or post an “I'm Looking For” request and let AI do the hunting.",
+                  d: "Buy and sell pre-loved items, hire trusted local services, or post an “I'm Looking For” request and let AI do the hunting.",
                 },
                 {
                   n: "03",
@@ -680,37 +640,15 @@ export default function LandingPage() {
       {/* -------------------------- testimonials ------------------------- */}
       <section id="safety" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 sm:py-24">
         <div className="mx-auto max-w-2xl text-center">
-          <Badge tone="brand">Trusted by neighbours</Badge>
+          <Badge tone="brand">Safety first</Badge>
           <h2 className="mt-3 text-balance text-3xl font-extrabold tracking-tight text-ink-900 sm:text-4xl">
             Real people. Real deals. Real close by.
           </h2>
         </div>
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {TESTIMONIALS.map((t) => (
-            <figure key={t.name} className="flex flex-col rounded-3xl bg-white p-6 shadow-card ring-1 ring-stone-100/80">
-              <div className="flex gap-0.5 text-accent-400">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Star key={i} size={14} fill="currentColor" strokeWidth={0} />
-                ))}
-              </div>
-              <blockquote className="mt-3.5 flex-1 text-[14px] leading-relaxed text-ink-700">
-                “{t.quote}”
-              </blockquote>
-              <figcaption className="mt-5 flex items-center gap-3 border-t border-stone-100 pt-4">
-                <span
-                  className="flex h-10 w-10 items-center justify-center rounded-full text-[13px] font-extrabold text-white"
-                  style={{ background: `linear-gradient(135deg,${t.from},${t.to})` }}
-                >
-                  {t.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
-                </span>
-                <div>
-                  <p className="text-[13.5px] font-extrabold text-ink-900">{t.name}</p>
-                  <p className="text-[11.5px] font-semibold text-ink-400">{t.detail}</p>
-                </div>
-              </figcaption>
-            </figure>
-          ))}
-        </div>
+        <p className="mx-auto mt-4 max-w-xl text-pretty text-[14.5px] leading-relaxed text-ink-500">
+          We’re new and growing honestly — no paid placements, no fake reviews. Every listing
+          you see is posted by a real neighbour, and every deal starts with a conversation.
+        </p>
 
         {/* safety strip */}
         <div className="mt-14 flex flex-col items-center gap-4 rounded-3xl bg-brand-50/60 p-6 ring-1 ring-brand-100 sm:flex-row sm:gap-5 sm:p-7">
@@ -725,7 +663,7 @@ export default function LandingPage() {
             </p>
           </div>
           <Link href="/login" className="shrink-0 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-brand-700 shadow-soft ring-1 ring-brand-100 transition hover:bg-brand-100">
-            Read safety tips
+            Get started free
           </Link>
         </div>
       </section>
@@ -741,7 +679,7 @@ export default function LandingPage() {
               Ready to buy smarter and sell faster?
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-pretty text-[15px] leading-relaxed text-brand-50/85">
-              Join 12,400+ neighbours on Locora. Free forever for buyers and sellers — no commission,
+              Join your neighbourhood on Locora. Free forever for buyers and sellers — no commission,
               no hidden fees.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
