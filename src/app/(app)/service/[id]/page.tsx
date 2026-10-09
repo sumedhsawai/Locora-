@@ -108,7 +108,7 @@ export default function ServicePage() {
     });
     setReportOpen(false);
     setReportDetails("");
-    push({ kind: "success", title: "Report submitted", body: "Locora AI & our team will review it shortly" });
+    push({ kind: "success", title: "Report submitted", body: "Our team will review it shortly" });
   };
 
   const share = async () => {
@@ -436,7 +436,7 @@ export default function ServicePage() {
 
       <Modal open={reportOpen} onClose={() => setReportOpen(false)}>
         <h2 className="text-[17px] font-extrabold text-ink-900">Report this provider</h2>
-        <p className="mt-1 text-[13px] text-ink-500">Reports go to Locora AI and the moderation team.</p>
+        <p className="mt-1 text-[13px] text-ink-500">Reports go to the moderation team.</p>
         <div className="mt-4 space-y-2">
           {REPORT_REASONS.map((r) => (
             <button

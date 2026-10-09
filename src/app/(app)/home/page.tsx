@@ -169,7 +169,7 @@ export default function HomePage() {
       <section className="animate-fade-up" style={{ animationDelay: ".05s" }}>
         <SectionHeading
           title="I'm Looking For"
-          sub="Neighbours asking, AI hunting — matches in minutes"
+          sub="Neighbours asking — matches in minutes"
           action={
             <Link href="/requests" className="inline-flex items-center gap-1 text-[13px] font-bold text-brand-700 transition hover:text-brand-800">
               See all <ArrowRight size={14} />
@@ -186,7 +186,7 @@ export default function HomePage() {
             </span>
             <p className="mt-3 text-[13.5px] font-extrabold leading-snug text-ink-900">Post what you need</p>
             <p className="mt-1 text-[11.5px] font-medium leading-snug text-ink-500">
-              Can&apos;t find it? Let AI match sellers &amp; pros near you
+              Can&apos;t find it? Get matched with sellers &amp; pros near you
             </p>
           </Link>
           {hydrated ? (
@@ -223,7 +223,7 @@ export default function HomePage() {
       <section className="animate-fade-up" style={{ animationDelay: ".15s" }}>
         <SectionHeading
           title={category === "all" ? "Fresh near you" : `${PRODUCT_CATEGORIES.find((c) => c.id === category)?.label} near you`}
-          sub="Ranked by AI for value and proximity"
+          sub="Ranked by proximity"
         />
         {!hydrated ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 xl:grid-cols-4">
@@ -246,7 +246,7 @@ export default function HomePage() {
               </h3>
               <p className="mt-2.5 max-w-lg text-[14px] leading-relaxed text-white/70">
                 Be one of the first people in your area. Post what you&apos;re selling, offer a
-                service, or tell everyone what you&apos;re looking for — Locora&apos;s AI starts
+                service, or tell everyone what you&apos;re looking for — matching starts
                 matching the moment neighbours join.
               </p>
               <div className="mt-6 flex flex-wrap gap-2.5">
@@ -266,7 +266,7 @@ export default function HomePage() {
           <EmptyState
             icon={<Megaphone size={22} />}
             title="Nothing listed here yet"
-            body={`No ${category === "all" ? "items" : category} ads here right now. Post an "I'm Looking For" request and Locora AI will alert you the moment something matching appears.`}
+            body={`No ${category === "all" ? "items" : category} ads here right now. Post an "I'm Looking For" request and we'll notify matching sellers near you.`}
             action={<Button onClick={() => router.push("/requests")}>Post a request</Button>}
           />
         ) : (

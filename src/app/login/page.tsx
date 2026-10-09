@@ -716,7 +716,7 @@ export default function LoginPage() {
             <ul className="mt-8 space-y-4">
               {[
                 "18,400+ live listings within a few km of you",
-                "AI that writes your listings and finds your requests",
+                "Smart listing drafts and request matching",
                 "Chat, meet and close the deal — safely, in person",
               ].map((t) => (
                 <li key={t} className="flex items-start gap-3 text-[14.5px] font-medium text-white/70">

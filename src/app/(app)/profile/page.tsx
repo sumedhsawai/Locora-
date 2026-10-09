@@ -353,7 +353,7 @@ export default function ProfilePage() {
               </span>
               <p className="mt-3 text-[15px] font-extrabold text-ink-900">No ads yet</p>
               <p className="mx-auto mt-1 max-w-xs text-[13px] text-ink-500">
-                Turn your pre-loved things into cash — AI writes the ad for you in seconds.
+                Turn your pre-loved things into cash — get a polished draft in seconds.
               </p>
               <Link href="/create/listing" className="mt-4 inline-block"><Button>Post your first ad</Button></Link>
             </div>
@@ -399,7 +399,7 @@ export default function ProfilePage() {
           <div className="flex items-center gap-2 rounded-2xl bg-accent-50/70 p-3.5 ring-1 ring-accent-100">
             <Sparkles size={15} className="shrink-0 text-accent-600" />
             <p className="text-[12.5px] font-semibold text-accent-800">
-              AI watches your saved items — you get a notification the moment a price drops.
+              All your saved items in one place — tap to revisit and compare anytime.
             </p>
           </div>
           {favorites.length === 0 ? (
@@ -498,7 +498,7 @@ export default function ProfilePage() {
               </span>
               <p className="mt-3 text-[15px] font-extrabold text-ink-900">No requests yet</p>
               <p className="mx-auto mt-1 max-w-xs text-[13px] text-ink-500">
-                Can&apos;t find something? Post a request and let AI hunt for you.
+                Can&apos;t find something? Post a request and let nearby sellers come to you.
               </p>
               <Link href="/requests" className="mt-4 inline-block"><Button>Post a request</Button></Link>
             </div>
@@ -516,7 +516,7 @@ export default function ProfilePage() {
                   <p className="line-clamp-2 text-[13.5px] font-semibold leading-snug text-ink-800">“{r.text}”</p>
                   <p className="mt-1.5 flex items-center gap-2 text-[11.5px] font-semibold text-ink-400">
                     {r.status === "open" ? <Badge tone="brand">Open</Badge> : <Badge tone="stone">Fulfilled</Badge>}
-                    {r.matches.length > 0 && <span className="flex items-center gap-1"><Sparkles size={11} className="text-accent-500" /> {r.matches.length} AI match{r.matches.length > 1 ? "es" : ""}</span>}
+                    {r.matches.length > 0 && <span className="flex items-center gap-1"><Sparkles size={11} className="text-accent-500" /> {r.matches.length} match{r.matches.length > 1 ? "es" : ""}</span>}
                     <span>{timeAgo(r.createdAt)}</span>
                   </p>
                 </div>

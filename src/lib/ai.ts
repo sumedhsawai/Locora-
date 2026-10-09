@@ -170,7 +170,7 @@ export async function parseSearchQuery(query: string): Promise<SearchParse> {
   const voices = [
     `Got it — looking for ${parts.join(", ")}. I've also ranked nearby results first. 🌱`,
     `Nice, a clear brief! ${parts.join(", ")} — and I've bumped well-priced listings to the top.`,
-    `Understood! Showing ${parts.join(", ")}. Save the ones you like and I'll watch for price drops.`,
+    `Understood! Showing ${parts.join(", ")}. Nearest results first.`,
   ];
 
   return {
@@ -203,7 +203,7 @@ export interface ListingDraft {
   description: string;
   tags: string[];
   priceRange: { min: number; max: number };
-  confidence: number;
+  matched: boolean;
   note: string;
 }
 
@@ -231,27 +231,40 @@ const PRICE_BENCHMARKS: { match: string[]; min: number; max: number; name: strin
   { match: ["guitar"], min: 4500, max: 13000, name: "guitar" },
   { match: ["watch"], min: 1200, max: 6000, name: "watch" },
   { match: ["shoes", "sneakers"], min: 1200, max: 4500, name: "sneakers" },
+  { match: ["royal enfield", "enfield", "classic 350", "bullet 350"], min: 110000, max: 180000, name: "Royal Enfield" },
+  { match: ["activa", "scooter", "jupiter", "access"], min: 45000, max: 80000, name: "scooter" },
+  { match: ["pulsar", "apache", "duke", "ktm", "motorcycle", "bike"], min: 40000, max: 95000, name: "motorcycle" },
+  { match: ["car", "hatchback", "sedan", "swift", "i20", "alto"], min: 220000, max: 550000, name: "car" },
+  { match: ["ps5", "playstation 5", "playstation"], min: 30000, max: 42000, name: "PlayStation 5" },
+  { match: ["ps4", "playstation 4"], min: 16000, max: 22000, name: "PlayStation 4" },
+  { match: ["xbox series", "xbox"], min: 24000, max: 36000, name: "Xbox" },
+  { match: ["nintendo switch", "switch lite"], min: 14000, max: 22000, name: "Nintendo Switch" },
+  { match: ["oneplus"], min: 12000, max: 30000, name: "OnePlus" },
+  { match: ["pixel"], min: 15000, max: 45000, name: "Pixel" },
 ];
 
 export async function generateListingDraft(raw: string, ageYears: number): Promise<ListingDraft> {
   await wait(1200 + Math.random() * 800);
   const q = raw.toLowerCase();
-  const bench =
-    PRICE_BENCHMARKS.find((b) => b.match.some((m) => q.includes(m))) ??
-    ({ min: 2000, max: 10000, name: "item" } as (typeof PRICE_BENCHMARKS)[number]);
+  const bench = PRICE_BENCHMARKS.find((b) => b.match.some((m) => new RegExp(`\\b${m}\\b`).test(q)));
+  const matched = !!bench;
+  const range = bench ?? { min: 2000, max: 10000, name: "item" };
 
   const cond = detectCondition(q) ?? "good";
   const condFactor = cond === "new" ? 1.25 : cond === "like-new" ? 1.05 : cond === "good" ? 0.9 : 0.75;
   const ageFactor = Math.max(0.55, 1 - (ageYears || 1) * 0.09);
-  const min = Math.round((bench.min * condFactor * ageFactor) / 500) * 500;
-  const max = Math.round((bench.max * condFactor * ageFactor) / 500) * 500;
+  const min = Math.round((range.min * condFactor * ageFactor) / 500) * 500;
+  const max = Math.round((range.max * condFactor * ageFactor) / 500) * 500;
+
+  const BRAND_CASE: Record<string, string> = { iphone: "iPhone", iphones: "iPhones", ipad: "iPad", ipod: "iPod", macbook: "MacBook", airpods: "AirPods", ps5: "PS5", ps4: "PS4", ps3: "PS3", xbox: "Xbox", tv: "TV", led: "LED", lcd: "LCD", ac: "AC", android: "Android", bluetooth: "Bluetooth", dslr: "DSLR", slr: "SLR", upsc: "UPSC", neet: "NEET", jee: "JEE", cbse: "CBSE", icse: "ICSE", km: "km", kg: "kg" };
 
   const prettyTitle = raw
-    .replace(/\b(selling|for sale|my|used|the|a|an|want to sell)\b/gi, " ")
+    .replace(/^\s*(?:i'?m|i am)?\s*(?:want to|looking to)?\s*(?:selling|sell|for sale)\s+(?:my|a|an|the)?\s*/i, "")
+    .replace(/^\s*(?:my|a|an|the)\s+/i, "")
     .replace(/\s+/g, " ")
     .trim()
     .split(" ")
-    .map((w) => (w.length > 2 && w === w.toUpperCase() ? w : w.charAt(0).toUpperCase() + w.slice(1)))
+    .map((w) => BRAND_CASE[w.toLowerCase()] ?? (w.length > 2 && w === w.toUpperCase() ? w : w.charAt(0).toUpperCase() + w.slice(1)))
     .join(" ")
     .slice(0, 64);
 
@@ -277,12 +290,12 @@ export async function generateListingDraft(raw: string, ageYears: number): Promi
   )}`;
 
   return {
-    title: prettyTitle || `${bench.name} for sale`,
+    title: prettyTitle || `${range.name} for sale`,
     description,
-    tags: [...new Set([cond === "like-new" ? "Like new" : "Well maintained", "Verified by AI draft", pickBySeed(tagPool, raw + "x")])].slice(0, 4),
+    tags: [...new Set([cond === "like-new" ? "Like new" : "Well maintained", pickBySeed(tagPool, raw + "x")])].slice(0, 4),
     priceRange: { min, max },
-    confidence: 82 + (Math.floor(Math.random() * 12) as number),
-    note: `Based on ${18 + Math.floor(Math.random() * 30)} similar listings in Pune over the last 90 days.`,
+    matched,
+    note: matched ? `Typical price range for a used ${range.name}.` : "",
   };
 }
 

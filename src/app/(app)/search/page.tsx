@@ -225,7 +225,7 @@ function SearchInner() {
               Search like you talk.
             </h1>
             <p className="mt-2 max-w-lg text-[14.5px] leading-relaxed text-brand-50/85">
-              No filters, no category digging. Tell Locora AI what you need in plain words — it
+              No filters, no category digging. Tell us what you need in plain words — it
               understands the category, budget, area and condition, then ranks the best matches
               for you.
             </p>
@@ -287,7 +287,7 @@ function SearchInner() {
             </div>
           </div>
           <p className="mt-3 pl-12 text-[12.5px] font-semibold text-ink-400">
-            Locora AI is reading your request…
+            Reading your request…
           </p>
         </div>
       )}
@@ -373,7 +373,7 @@ function SearchInner() {
               <EmptyState
                 icon={<Megaphone size={22} />}
                 title="No services matched — yet"
-                body="Post an 'I'm Looking For' request with your budget and timing. Locora AI will notify matching providers near you within minutes."
+                body="Post an 'I'm Looking For' request with your budget and timing. We'll notify matching providers near you within minutes."
                 action={<Button onClick={() => router.push("/requests")}>Post a request</Button>}
               />
             ) : (
@@ -391,8 +391,8 @@ function SearchInner() {
           ) : products.length === 0 ? (
             <EmptyState
               icon={<Megaphone size={22} />}
-              title="No results — but AI can hunt for you"
-              body={`Nothing matches “${query}” right now. Post an 'I'm Looking For' request and Locora AI will watch every new listing and ping you when something fits.`}
+              title="No results — but we can hunt for you"
+              body={`Nothing matches “${query}” right now. Post an 'I'm Looking For' request and we'll surface matches as new listings appear.`}
               action={<Button onClick={() => router.push("/requests")}>Post a request</Button>}
             />
           ) : (

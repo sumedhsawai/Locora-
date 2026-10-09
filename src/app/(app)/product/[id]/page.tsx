@@ -222,7 +222,7 @@ export default function ProductPage() {
     });
     setReportOpen(false);
     setReportDetails("");
-    push({ kind: "success", title: "Report submitted", body: "Locora AI & our team will review it shortly" });
+    push({ kind: "success", title: "Report submitted", body: "Our team will review it shortly" });
   };
 
   const share = async () => {
@@ -266,7 +266,7 @@ export default function ProductPage() {
             <ShieldAlert size={18} />
           </span>
           <div className="min-w-0">
-            <p className="text-[14px] font-extrabold text-rose-700">Locora AI flagged this listing — proceed with extreme caution</p>
+            <p className="text-[14px] font-extrabold text-rose-700">Our scam screen flagged this listing — proceed with extreme caution</p>
             <ul className="mt-1.5 space-y-1">
               {product.flagged.reasons.map((r) => (
                 <li key={r} className="text-[12.5px] font-medium leading-snug text-rose-600">• {r}</li>
@@ -387,7 +387,7 @@ export default function ProductPage() {
               <p className="text-[13.5px] font-extrabold text-ink-900">Meet first. Pay after. Always.</p>
               <p className="mt-0.5 text-[12.5px] leading-relaxed text-ink-500">
                 Locora never asks for online payments. Inspect the item in person, keep the chat on the app, and
-                report anything fishy — our AI reviews every report.
+                report anything fishy — our team reviews every report.
               </p>
             </div>
           </div>
@@ -601,7 +601,7 @@ export default function ProductPage() {
       {/* report modal */}
       <Modal open={reportOpen} onClose={() => setReportOpen(false)}>
         <h2 className="text-[17px] font-extrabold text-ink-900">Report this listing</h2>
-        <p className="mt-1 text-[13px] text-ink-500">Reports go to Locora AI and the moderation team — usually reviewed within hours.</p>
+        <p className="mt-1 text-[13px] text-ink-500">Reports go to the moderation team — usually reviewed within hours.</p>
         <div className="mt-4 space-y-2">
           {REPORT_REASONS.map((r) => (
             <button

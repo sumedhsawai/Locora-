@@ -97,7 +97,7 @@ function CreateListingInner() {
   /* -------- AI listing generator -------- */
   const runAi = async () => {
     if (raw.trim().length < 6) {
-      push({ kind: "error", title: "Tell the AI a little more first", body: "e.g. “selling my 2-year-old iPhone 13, with box and bill”" });
+      push({ kind: "error", title: "Tell us a little more first", body: "e.g. “selling my 2-year-old iPhone 13, with box and bill”" });
       return;
     }
     setAiBusy(true);
@@ -111,12 +111,12 @@ function CreateListingInner() {
     setDescription(d.description);
     setTags(d.tags);
     if (!category && parse.kind === "product" && parse.category) setCategory(parse.category as ProductCategory);
-    if (!price) {
+    if (!price && d.matched) {
       const mid = Math.round((d.priceRange.min + d.priceRange.max) / 2 / 100) * 100;
       setPrice(String(mid));
     }
     setAiBusy(false);
-    push({ kind: "success", title: "AI draft ready ✨", body: "Edit anything before publishing" });
+    push({ kind: "success", title: "Draft ready", body: "Edit anything before publishing" });
   };
 
   /* -------- price suggestion (debounced) -------- */
@@ -200,7 +200,7 @@ function CreateListingInner() {
       body: `${product.title} is now visible to buyers near ${location && !isPune(location) ? location.city : areaName(area)}`,
       href: `/product/${id}`,
     });
-    push({ kind: "success", title: "Ad published 🎉", body: "AI scam shield cleared it — you're live" });
+    push({ kind: "success", title: "Ad published 🎉", body: "Scam screen cleared it — you're live" });
     router.push(`/product/${id}`);
   };
 
@@ -224,7 +224,7 @@ function CreateListingInner() {
       return;
     }
     if (check.level === "medium") {
-      push({ kind: "info", title: "AI noted some risk signals", body: "Published — keep the chat on Locora and avoid advance payments" });
+      push({ kind: "info", title: "We noted some risk signals", body: "Published — keep the chat on Locora and avoid advance payments" });
     }
     doPublish();
   };
@@ -245,7 +245,7 @@ function CreateListingInner() {
         <p className="mt-1 text-[14px] text-ink-500">
           {editing
             ? "Update anything — photos, price, description. Changes go live instantly."
-            : "Describe it in your words — Locora AI turns it into a polished listing."}
+            : "Describe it in your words — we'll turn it into a polished draft."}
         </p>
       </div>
 
@@ -320,7 +320,7 @@ function CreateListingInner() {
           <div className="mt-4 flex items-center gap-3 rounded-xl bg-brand-50/70 px-4 py-3.5 ring-1 ring-brand-100">
             <Sparkles size={15} className="animate-pulse text-brand-600" />
             <p className="text-[13px] font-semibold text-brand-800">
-              Locora AI is writing your listing <TypingDots className="text-brand-500" />
+              Preparing your draft <TypingDots className="text-brand-500" />
             </p>
           </div>
         )}
@@ -328,7 +328,7 @@ function CreateListingInner() {
           <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-brand-50/70 px-4 py-3 ring-1 ring-brand-100">
             <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-brand-600" />
             <p className="text-[12.5px] font-semibold leading-snug text-brand-800">
-              AI draft applied — {draft.confidence}% confidence. {draft.note} Edit freely below.
+              Draft applied — edit freely below. {draft.note}
             </p>
           </div>
         )}
@@ -370,7 +370,7 @@ function CreateListingInner() {
         <div className="flex items-center gap-2.5">
           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink-950 text-[12px] font-extrabold text-brand-300">3</span>
           <h2 className="text-[15.5px] font-extrabold text-ink-900">Title & description</h2>
-          {draft && <Badge tone="brand"><Sparkles size={10} /> AI drafted</Badge>}
+          {draft && <Badge tone="brand"><Sparkles size={10} /> Draft ready</Badge>}
         </div>
         <input
           value={title}
@@ -426,14 +426,14 @@ function CreateListingInner() {
 
         {suggestBusy && (
           <div className="mt-4 flex items-center gap-2.5 text-[12.5px] font-semibold text-ink-400">
-            <Sparkles size={13} className="animate-pulse text-brand-500" /> AI is comparing nearby listings…
+            <Sparkles size={13} className="animate-pulse text-brand-500" /> Comparing nearby listings…
           </div>
         )}
         {suggestion && !suggestBusy && (
           <div className="mt-4 rounded-2xl bg-accent-50/60 p-4 ring-1 ring-accent-100">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="flex items-center gap-1.5 text-[13px] font-extrabold text-accent-800">
-                <Sparkles size={14} /> AI suggests {inr(suggestion.fair)} for this
+                <Sparkles size={14} /> Nearby listings suggest {inr(suggestion.fair)}
               </p>
               <Badge tone={suggestion.verdict.label === "great" ? "brand" : suggestion.verdict.label === "high" ? "rose" : "amber"}>
                 your price: {suggestion.verdict.label === "great" ? "below market" : suggestion.verdict.label === "high" ? `${suggestion.verdict.deltaPct}% above market` : "in the right zone"}
@@ -508,7 +508,7 @@ function CreateListingInner() {
           <ShieldCheck size={17} /> {editing ? "Save changes" : "Publish ad"}
         </Button>
         <p className="flex items-center gap-1.5 text-[12px] font-semibold text-ink-400">
-          <ShieldCheck size={13} className="text-brand-600" /> AI scam shield runs before your ad goes live
+          <ShieldCheck size={13} className="text-brand-600" /> Scam screening runs before your ad goes live
         </p>
       </div>
 
@@ -522,7 +522,7 @@ function CreateListingInner() {
             </span>
             <h2 className="mt-4 text-[18px] font-extrabold text-ink-900">Hold on — risk score {scamBlock.score}/100</h2>
             <p className="mt-1.5 text-[13.5px] leading-relaxed text-ink-500">
-              Locora AI found patterns that look like a scam listing. Buyers will see a big warning — and it may be
+              Our scam screen found patterns that look like a scam listing. Buyers will see a big warning — and it may be
               removed by moderators.
             </p>
             <ul className="mt-3.5 space-y-2">

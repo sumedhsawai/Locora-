@@ -116,7 +116,7 @@ function CreateServiceInner() {
     }
     setAiBusy(false);
     setAiApplied(true);
-    push({ kind: "success", title: "AI profile ready ✨", body: "Edit anything before publishing" });
+    push({ kind: "success", title: "Profile draft ready", body: "Edit anything before publishing" });
   };
 
   const publish = () => {
@@ -197,7 +197,7 @@ function CreateServiceInner() {
         <p className="mt-1 text-[14px] text-ink-500">
           {editing
             ? "Update your trade, pricing, photos or availability — changes go live instantly."
-            : "Tell us your trade — AI writes a profile neighbours trust."}
+            : "Tell us your trade — get a ready-made profile draft."}
         </p>
       </div>
 
@@ -282,7 +282,7 @@ function CreateServiceInner() {
         <div className="flex items-center gap-2.5">
           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink-950 text-[12px] font-extrabold text-brand-300">2</span>
           <h2 className="text-[15.5px] font-extrabold text-ink-900">Your profile</h2>
-          {aiApplied && <Badge tone="brand"><Sparkles size={10} /> AI drafted</Badge>}
+          {aiApplied && <Badge tone="brand"><Sparkles size={10} /> Draft ready</Badge>}
         </div>
         <div className="mt-3.5">
           <Button onClick={runAi} loading={aiBusy} disabled={!trade}>
@@ -293,7 +293,7 @@ function CreateServiceInner() {
           <div className="mt-4 flex items-center gap-3 rounded-xl bg-brand-50/70 px-4 py-3.5 ring-1 ring-brand-100">
             <Sparkles size={15} className="animate-pulse text-brand-600" />
             <p className="text-[13px] font-semibold text-brand-800">
-              Locora AI is crafting your profile <TypingDots className="text-brand-500" />
+              Preparing your profile draft <TypingDots className="text-brand-500" />
             </p>
           </div>
         )}
@@ -301,7 +301,7 @@ function CreateServiceInner() {
           <div className="mt-4 flex items-start gap-2.5 rounded-xl bg-brand-50/70 px-4 py-3 ring-1 ring-brand-100">
             <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-brand-600" />
             <p className="text-[12.5px] font-semibold leading-snug text-brand-800">
-              AI applied a tagline, bio and skill set tuned to your trade and area. Edit freely below.
+              We applied a tagline, bio and skill set tuned to your trade and area. Edit freely below.
             </p>
           </div>
         )}

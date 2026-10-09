@@ -71,10 +71,10 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
     setText("");
     setCategory("");
     setBudget("");
-    push({ kind: "success", title: "Request posted ✨", body: "Locora AI is matching nearby locals now" });
+    push({ kind: "success", title: "Request posted ✨", body: "We're matching you with nearby locals now" });
     notify({
       kind: "match",
-      title: "AI is on it 🔍",
+      title: "Matching now 🔍",
       body: `Matching providers near ${areaName(area)} for “${request.text.slice(0, 42)}…”`,
       href: "/requests",
     });
@@ -87,14 +87,14 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
         dispatch({ type: "UPDATE_REQUEST", id, patch: { watching: true } });
         notify({
           kind: "match",
-          title: "No matches yet — AI is watching",
+          title: "No matches yet — keep checking",
           body: "We'll ping you the moment a matching listing or provider appears nearby",
           href: "/requests",
         });
       } else {
         notify({
           kind: "match",
-          title: `AI found ${matches.length} match${matches.length > 1 ? "es" : ""} 🎯`,
+          title: `Found ${matches.length} match${matches.length > 1 ? "es" : ""} 🎯`,
           body: `Top match: ${matches[0]?.reason ?? ""}`,
           href: "/requests",
         });
@@ -110,7 +110,7 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
         </span>
         <div>
           <h2 className="text-[17px] font-extrabold text-ink-900">I&apos;m Looking For…</h2>
-          <p className="text-[12px] text-ink-400">One request · AI notifies the right people nearby</p>
+          <p className="text-[12px] text-ink-400">One request · the right people nearby get notified</p>
         </div>
       </div>
       <textarea
@@ -177,7 +177,7 @@ function Composer({ open, onClose }: { open: boolean; onClose: () => void }) {
         ))}
       </div>
       <Button size="lg" className="mt-5 w-full" onClick={post}>
-        <Sparkles size={17} /> Post request &amp; let AI match
+        <Sparkles size={17} /> Post request &amp; get matches
       </Button>
     </Modal>
   );
@@ -317,14 +317,14 @@ function RequestCardDetailed({
           <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 shadow-card">
             <Sparkles size={16} className="animate-pulse text-accent-500" />
             <p className="text-[13px] font-semibold text-ink-500">
-              Locora AI is ranking nearby sellers &amp; providers <TypingDots className="text-ink-300" />
+              Ranking nearby sellers &amp; providers <TypingDots className="text-ink-300" />
             </p>
           </div>
         ) : request.matches.length > 0 ? (
           <>
             <p className="mb-2.5 flex items-center gap-1.5 text-[11.5px] font-extrabold uppercase tracking-wide text-ink-400">
               <Sparkles size={12} className="text-accent-500" />
-              {request.matches.length} AI match{request.matches.length > 1 ? "es" : ""} · ranked by distance, rating &amp; response
+              {request.matches.length} match{request.matches.length > 1 ? "es" : ""} · ranked by distance, rating &amp; response
             </p>
             <div className="space-y-2.5">
               {shown.map((m) => (
@@ -356,7 +356,7 @@ function RequestCardDetailed({
           <div className="flex items-center gap-3 rounded-2xl bg-accent-50/70 px-4 py-3.5 ring-1 ring-accent-100">
             <Sparkles size={15} className="shrink-0 text-accent-600" />
             <p className="text-[12.5px] font-semibold leading-snug text-accent-800">
-              No confident matches yet — AI is watching every new listing and provider nearby and will notify{" "}
+              No confident matches yet — new listings and providers nearby show up as matches and will notify{" "}
               {mine ? "you" : buyer?.name.split(" ")[0]} automatically.
             </p>
           </div>
@@ -406,7 +406,7 @@ export default function RequestsPage() {
             I&apos;m Looking For
           </h1>
           <p className="mt-1.5 text-[13.5px] text-ink-500">
-            Post what you need — Locora AI matches, ranks and notifies the right people nearby.
+            Post what you need — We match, rank and notify the right people nearby.
           </p>
         </div>
         <Button onClick={() => setComposerOpen(true)}>
@@ -446,7 +446,7 @@ export default function RequestsPage() {
             {filter === "mine" ? "You haven't posted any requests yet" : "No requests here right now"}
           </h3>
           <p className="mx-auto mt-1.5 max-w-sm text-[13.5px] leading-relaxed text-ink-500">
-            Be the first — describe what you need and let AI find sellers and service providers near you.
+            Be the first — describe what you need and get matched with sellers and service providers near you.
           </p>
           <Button className="mt-5" onClick={() => setComposerOpen(true)}>Post what you need</Button>
         </div>
@@ -463,12 +463,12 @@ export default function RequestsPage() {
       {/* how it works */}
       <div className="rounded-3xl bg-ink-950 p-6 text-white">
         <p className="flex items-center gap-2 text-[15px] font-extrabold">
-          <Sparkles size={17} className="text-brand-300" /> How AI matching works
+          <Sparkles size={17} className="text-brand-300" /> How matching works
         </p>
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           {[
             { n: "1", t: "You post", d: "Plain words + budget + urgency. No forms, no categories to dig through." },
-            { n: "2", t: "AI ranks locals", d: "Providers & sellers scored on distance, rating, response time and budget fit." },
+            { n: "2", t: "We rank locals", d: "Providers & sellers scored on distance, rating, response time and budget fit." },
             { n: "3", t: "Both sides get pinged", d: "Matched locals get notified instantly — chats usually start within minutes." },
           ].map((s) => (
             <div key={s.n} className="rounded-2xl bg-white/[.06] p-4 ring-1 ring-white/10">

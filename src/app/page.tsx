@@ -205,14 +205,14 @@ const FEATURES = [
   },
   {
     icon: Sparkles,
-    title: "AI listing writer",
-    body: "Type three words about what you're selling. Get a polished title, a trustworthy description, smart tags and a fair price range — written in seconds.",
+    title: "Listing drafter",
+    body: "Describe what you're selling in one line — get a polished title, a ready-made description and smart tags in seconds. Edit anything before publishing.",
     accent: "bg-violet-50 text-violet-600 ring-violet-100",
   },
   {
     icon: Megaphone,
     title: "“I'm Looking For” board",
-    body: "Can't find it? Post what you need. Locora AI matches nearby sellers and service providers, ranks them by distance and rating, and notifies you automatically.",
+    body: "Can't find it? Post what you need. We match nearby sellers and service providers, rank them by distance and rating, and notifies you automatically.",
     accent: "bg-accent-50 text-accent-600 ring-accent-100",
   },
   {
@@ -224,12 +224,12 @@ const FEATURES = [
   {
     icon: BadgeCheck,
     title: "Trust, built in",
-    body: "Real reviews from neighbours, response-time badges so you know who'll reply fast, and an AI scam shield on every listing.",
+    body: "Real reviews from neighbours, response-time badges so you know who'll reply fast, and a scam shield on every listing.",
     accent: "bg-brand-50 text-brand-600 ring-brand-100",
   },
   {
     icon: ShieldCheck,
-    title: "AI scam shield",
+    title: "Scam shield",
     body: "Every listing passes through scam detection that flags too-good-to-be-true prices, advance-payment tricks and off-platform bait before you ever see them.",
     accent: "bg-rose-50 text-rose-600 ring-rose-100",
   },
@@ -238,7 +238,7 @@ const FEATURES = [
 const STATS: { value: React.ReactNode; label: string }[] = [
   { value: "₹0", label: "commission — free forever" },
   { value: "5 km", label: "hyperlocal feed around you" },
-  { value: "24/7", label: "AI scam shield on listings" },
+  { value: "24/7", label: "scam screening on listings" },
   { value: "Any city", label: "works worldwide" },
 ];
 
@@ -305,8 +305,8 @@ export default function LandingPage() {
             <p className="mt-5 max-w-xl text-pretty text-[16.5px] leading-relaxed text-white/65">
               Locora is the hyperlocal marketplace for your city — anywhere on Earth. Set your
               location and instantly see listings, services and people around you. Chat, meet
-              safely and close the deal in person — with AI that writes your listings,
-              understands your searches and finds the right people for you.
+              safely and close the deal in person — with smart search that understands plain words, price
+              checks against nearby listings, and scam screening on every ad.
             </p>
             <div className="mt-8">
               <HeroSearch />
@@ -376,7 +376,7 @@ export default function LandingPage() {
             Everything a marketplace does. Only smarter.
           </h2>
           <p className="mt-3 text-pretty text-[15.5px] leading-relaxed text-ink-500">
-            Six AI systems quietly working behind every listing, search and chat — so buyers find
+            Smart tools quietly working behind every listing and search — so buyers find
             things faster and sellers close deals sooner.
           </p>
         </div>
@@ -498,7 +498,7 @@ export default function LandingPage() {
                 {
                   n: "02",
                   t: "Search, post or ask",
-                  d: "Buy and sell pre-loved items, hire trusted local services, or post an “I'm Looking For” request and let AI do the hunting.",
+                  d: "Buy and sell pre-loved items, hire trusted local services, or post an “I'm Looking For” request and let nearby sellers come to you.",
                 },
                 {
                   n: "03",
@@ -553,7 +553,7 @@ export default function LandingPage() {
               Stop searching. Let the neighbourhood come to you.
             </h2>
             <p className="mt-3 text-pretty text-[15.5px] leading-relaxed text-white/60">
-              Post what you need — an item, a plumber, a photographer. Locora AI instantly matches
+              Post what you need — an item, a plumber, a photographer. We instantly match
               nearby sellers and providers, ranks them by distance and rating, and notifies the best
               ones for you.
             </p>
@@ -595,7 +595,7 @@ export default function LandingPage() {
                 <Sparkles size={20} className="text-brand-300" />
               </div>
               <p className="mt-2 text-[11px] font-bold uppercase tracking-wider text-brand-300/90">
-                AI matching
+                Smart matching
               </p>
             </div>
 
@@ -659,7 +659,7 @@ export default function LandingPage() {
             <h3 className="text-[15.5px] font-extrabold text-ink-900">Meet first, pay after. Always.</h3>
             <p className="mt-1 text-[13.5px] leading-relaxed text-ink-500">
               Locora has no online payments by design. Meet at a public place, inspect the item or
-              the work, and pay in person. Our AI scam shield and report system keep the fraudsters out.
+              the work, and pay in person. Our scam shield and report system keep the fraudsters out.
             </p>
           </div>
           <Link href="/login" className="shrink-0 rounded-xl bg-white px-4 py-2.5 text-sm font-bold text-brand-700 shadow-soft ring-1 ring-brand-100 transition hover:bg-brand-100">
