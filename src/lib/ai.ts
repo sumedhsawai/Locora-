@@ -23,6 +23,22 @@ import type {
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+/* Real AI path: server route that holds the Gemini key. Returns null on any
+ * failure (no key, quota, offline) so callers fall back to the local engine. */
+async function aiDraft<T>(payload: Record<string, unknown>): Promise<T | null> {
+  try {
+    const res = await fetch("/api/ai/draft", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
 /* ============================ NL search =========================== */
 
 export interface SearchChip {
@@ -244,6 +260,17 @@ const PRICE_BENCHMARKS: { match: string[]; min: number; max: number; name: strin
 ];
 
 export async function generateListingDraft(raw: string, ageYears: number): Promise<ListingDraft> {
+  const ai = await aiDraft<ListingDraft>({ kind: "listing", raw, ageYears });
+  if (ai && ai.title && ai.description) {
+    return {
+      title: ai.title,
+      description: ai.description,
+      tags: ai.tags?.length ? ai.tags.slice(0, 4) : ["Well maintained"],
+      priceRange: ai.priceRange ?? { min: 0, max: 0 },
+      matched: !!ai.matched,
+      note: ai.note ?? "",
+    };
+  }
   await wait(1200 + Math.random() * 800);
   const q = raw.toLowerCase();
   const bench = PRICE_BENCHMARKS.find((b) => b.match.some((m) => new RegExp(`\\b${m}\\b`).test(q)));
@@ -415,6 +442,15 @@ export async function generateServiceProfile(
   years: number,
   areaNameStr: string
 ): Promise<ServiceProfileDraft> {
+  const ai = await aiDraft<ServiceProfileDraft>({ kind: "service", trade, years, area: areaNameStr });
+  if (ai && ai.tagline && ai.bio) {
+    return {
+      tagline: ai.tagline,
+      bio: ai.bio,
+      skills: ai.skills?.length ? ai.skills.slice(0, 6) : ["General jobs"],
+      startingPrice: ai.startingPrice || 499,
+    };
+  }
   await wait(1300 + Math.random() * 700);
   const t: Partial<Record<ServiceCategory, { tagline: string[]; skills: string[]; price: number }>> = {
     plumber: { tagline: ["Leaky taps? Fixed right the first time.", "Honest plumbing, fair prices."], skills: ["Leaks & taps", "Drain unblocking", "Bathroom fittings"], price: 199 },
