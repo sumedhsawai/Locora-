@@ -179,9 +179,11 @@ export default function ServicePage() {
                 ) : (
                   <Badge tone="brand"><Sparkles size={10} /> New on Locora — be the first to hire</Badge>
                 )}
-                <span className="flex items-center gap-1.5 text-[13px] font-bold text-ink-700">
-                  <Clock size={14} className="text-ink-400" /> replies in {responseLabel(service.responseMins)}
-                </span>
+                {service.responseMins > 0 && (
+                  <span className="flex items-center gap-1.5 text-[13px] font-bold text-ink-700">
+                    <Clock size={14} className="text-ink-400" /> replies in {responseLabel(service.responseMins)}
+                  </span>
+                )}
               </div>
               <p className="mt-3 text-[15px] font-semibold italic text-ink-600">“{service.tagline}”</p>
             </div>

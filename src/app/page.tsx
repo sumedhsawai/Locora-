@@ -237,7 +237,7 @@ const FEATURES = [
 
 const STATS: { value: React.ReactNode; label: string }[] = [
   { value: "₹0", label: "commission — free forever" },
-  { value: "5 km", label: "hyperlocal feed around you" },
+  { value: "Your city", label: "feed tuned to your area" },
   { value: "24/7", label: "scam screening on listings" },
   { value: "Any city", label: "works worldwide" },
 ];
@@ -493,7 +493,7 @@ export default function LandingPage() {
                 {
                   n: "01",
                   t: "Sign up free, pick your area",
-                  d: "Viman Nagar, Baner, Kothrud… Locora tunes your entire feed to a 5 km radius around you.",
+                  d: "Viman Nagar, Baner, Kothrud… Locora tunes your feed to your city and neighbourhood — and shows how far each listing is.",
                 },
                 {
                   n: "02",

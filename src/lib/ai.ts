@@ -499,15 +499,15 @@ export function matchRequest(
     let score = 34 + s.rating * 8;
     score += Math.max(0, 14 - Math.min(d, 14));
     if (s.verified) score += 4;
-    if (s.responseMins <= 15) score += 7;
-    else if (s.responseMins <= 30) score += 3;
+    if (s.responseMins > 0 && s.responseMins <= 15) score += 7;
+    else if (s.responseMins > 0 && s.responseMins <= 30) score += 3;
     if (request.budgetMax && s.startingPrice > request.budgetMax) score -= 18;
     matches.push({
       userId: provider.id,
       serviceId: s.id,
       score: Math.min(99, Math.round(score)),
       distanceKm: d,
-      reason: `${s.rating}★ (${s.reviewsCount} reviews) · replies in ~${s.responseMins} min · ${d} km away`,
+      reason: `${s.rating}★ (${s.reviewsCount} reviews)${s.responseMins > 0 ? ` · replies in ~${s.responseMins} min` : ""} · ${d} km away`,
     });
   }
 

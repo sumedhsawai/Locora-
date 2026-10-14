@@ -100,7 +100,7 @@ export default function PublicProfilePage() {
                 {(user.reviewsCount ?? 1) === 1 ? "" : "s"}
               </span>
             ) : null}
-            <span>Replies in {responseLabel(user.responseMins ?? 15)}</span>
+            {(user.responseMins ?? 0) > 0 && <span>Replies in {responseLabel(user.responseMins as number)}</span>}
           </div>
           {isMe && (
             <p className="mt-3 text-[12.5px] font-semibold text-brand-600">

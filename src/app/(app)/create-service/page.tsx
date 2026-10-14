@@ -166,7 +166,7 @@ function CreateServiceInner() {
         rating: 0,
         reviewsCount: 0,
         jobsDone: 0,
-        responseMins: 15,
+        responseMins: 0,
         verified: false,
         createdAt: new Date().toISOString(),
         ...shared,

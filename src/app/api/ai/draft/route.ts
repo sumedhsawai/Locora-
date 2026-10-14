@@ -9,7 +9,10 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
-const MODELS = ["gemini-flash-latest", "gemini-3.8-flash"];
+/* Flash-Lite first: on the 2026 free tier it allows ~500 requests/day
+ * (full Flash is only ~20/day for new keys). Full Flash stays as a
+ * last-resort fallback — quality is similar for short listing drafts. */
+const MODELS = ["gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-flash-latest"];
 const ENDPOINT = (model: string) =>
   `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
