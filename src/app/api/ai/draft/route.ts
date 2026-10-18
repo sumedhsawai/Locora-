@@ -121,8 +121,25 @@ async function callGemini(
 /* ------------------------------- the route ------------------------------- */
 
 export async function POST(req: Request) {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) return NextResponse.json({ error: "ai-not-configured" }, { status: 503 });
+  /* Accept the key under any of the common names people use, and trim
+   * stray whitespace from pasted values — the #1 cause of silent failures. */
+  const key =
+    process.env.GEMINI_API_KEY ||
+    process.env.GEMINI_KEY ||
+    process.env.GEMINI_APIKEY ||
+    process.env.GOOGLE_AI_API_KEY ||
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
+    process.env.GOOGLE_API_KEY ||
+    "";
+  if (!key.trim())
+    return NextResponse.json(
+      {
+        error: "ai-not-configured",
+        hint: "Add the Gemini key as an environment variable (e.g. GEMINI_API_KEY) in Vercel, tick the Production environment, then redeploy.",
+      },
+      { status: 503 },
+    );
+  const apiKey = key.trim();
 
   const ip = (req.headers.get("x-forwarded-for") ?? "local").split(",")[0].trim();
   if (rateLimited(ip)) return NextResponse.json({ error: "rate-limited" }, { status: 429 });
@@ -142,7 +159,7 @@ export async function POST(req: Request) {
     if (!trade) return NextResponse.json({ error: "bad-input" }, { status: 400 });
 
     const out = await callGemini(
-      key,
+      apiKey,
       SERVICE_SYSTEM,
       `Trade: ${trade}\nYears of experience: ${years}\nArea they serve: ${area || "their neighbourhood"}`,
       SERVICE_SCHEMA,
@@ -166,7 +183,7 @@ export async function POST(req: Request) {
   if (raw.length < 3) return NextResponse.json({ error: "bad-input" }, { status: 400 });
 
   const out = await callGemini(
-    key,
+    apiKey,
     LISTING_SYSTEM,
     `Seller says: "${raw}"\nOwned for: ${ageYears} ${ageYears === 1 ? "year" : "years"}.`,
     LISTING_SCHEMA,

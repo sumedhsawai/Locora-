@@ -307,7 +307,21 @@ export async function generateListingDraft(raw: string, ageYears: number): Promi
     "Price slightly negotiable",
   ];
 
-  const description = `${prettyTitle || "This item"} is in ${cond === "like-new" ? "like-new" : cond} condition and has been well looked after${ageYears ? ` for the ${ageYears} year${ageYears > 1 ? "s" : ""} I've used it` : ""}. Everything works exactly as it should, and I'm happy to demonstrate it before you pay.\n\nReason for selling: I'm upgrading, and it deserves a new home rather than gathering dust.\n\n${pickBySeed(
+  /* offline fallback: build the description around the seller's own words so
+   * no two drafts read identical (the fixed-template version felt canned) */
+  const detail = raw
+    .replace(/^\s*(?:i'?m|i am)?\s*(?:want to|looking to)?\s*(?:selling|sell|for sale)\s+(?:my|a|an|the)?\s*/i, "")
+    .replace(/^\s*(?:my|a|an|the)\s+/i, "")
+    .trim() || "this item";
+  const condLabel = cond === "like-new" ? "like-new" : cond;
+  const description = `${prettyTitle || "This item"} — ${detail}. It's in ${condLabel} condition${ageYears ? `, ${ageYears} year${ageYears > 1 ? "s" : ""} with me` : ""} and well looked after. Everything works exactly as it should, and I'm happy to demonstrate it before you pay.\n\n${pickBySeed(
+    [
+      "Reason for selling: I'm upgrading, and it deserves a new home rather than gathering dust.",
+      "Reason for selling: moving soon and it shouldn't travel in a truck.",
+      "Reason for selling: barely use it anymore, so passing it on to someone who will.",
+    ],
+    raw + "r"
+  )}\n\n${pickBySeed(
     [
       "Preference to buyers who can pick up from my area — we can meet at a public spot nearby.",
       "I can share more photos or a quick video on request. Meet-up at a cafe or metro station works for me.",
