@@ -51,7 +51,7 @@ export default function ServicePage() {
       <div className="space-y-4">
         <Skeleton className="h-56 w-full rounded-2xl" />
         <Skeleton className="h-8 w-1/2" />
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
           <Skeleton className="h-64 rounded-2xl" />
           <Skeleton className="h-64 rounded-2xl" />
         </div>
@@ -130,7 +130,7 @@ export default function ServicePage() {
         <span className="text-ink-600">{serviceCategoryLabel(service.category)} · {areaName(service.area)}</span>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-8">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-8">
         {/* ---------------- left column ---------------- */}
         <div className="min-w-0 space-y-6">
           {service.isDemo && (

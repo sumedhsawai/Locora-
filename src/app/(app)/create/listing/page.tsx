@@ -402,7 +402,7 @@ function CreateListingInner() {
           <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink-950 text-[12px] font-extrabold text-brand-300">4</span>
           <h2 className="text-[15.5px] font-extrabold text-ink-900">Price</h2>
         </div>
-        <div className="mt-3.5 flex items-center gap-4">
+        <div className="mt-3.5 flex flex-wrap items-center gap-4">
           <label className="flex items-center gap-2 rounded-xl bg-stone-50 px-3.5 py-3 ring-1 ring-stone-200 focus-within:ring-2 focus-within:ring-brand-500">
             <IndianRupee size={16} className="text-ink-400" />
             <input

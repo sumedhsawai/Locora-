@@ -129,7 +129,7 @@ export default function ProductPage() {
       );
     }
     return (
-      <div className="grid gap-6 lg:grid-cols-[1fr_400px]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_400px]">
         <div className="space-y-4">
           <Skeleton className="aspect-[4/3] w-full rounded-2xl" />
           <Skeleton className="h-8 w-2/3" />
@@ -279,7 +279,7 @@ export default function ProductPage() {
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-8">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-8">
         {/* ---------------- left column ---------------- */}
         <div className="min-w-0 space-y-6">
           <Gallery images={product.images} title={product.title} />
