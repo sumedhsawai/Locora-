@@ -120,22 +120,40 @@ async function callGemini(
 
 /* ------------------------------- the route ------------------------------- */
 
+/* Accept the key under any of the common names people use, in ANY casing
+ * (env names are case-sensitive, so "Gemini_API_Key" ≠ "GEMINI_API_KEY"),
+ * and trim stray whitespace from pasted values — the top causes of
+ * silent failures. */
+const KEY_ENV_NAMES = [
+  "GEMINI_API_KEY",
+  "GEMINI_KEY",
+  "GEMINI_APIKEY",
+  "GOOGLE_AI_API_KEY",
+  "GOOGLE_GENERATIVE_AI_API_KEY",
+  "GOOGLE_API_KEY",
+];
+function resolveApiKey(): string {
+  for (const name of KEY_ENV_NAMES) {
+    const v = process.env[name];
+    if (v && v.trim()) return v.trim();
+  }
+  /* case-insensitive fallback: matches Gemini_API_Key, gemini_api_key, … */
+  for (const name of Object.keys(process.env)) {
+    if (KEY_ENV_NAMES.includes(name.toUpperCase())) {
+      const v = process.env[name];
+      if (v && v.trim()) return v.trim();
+    }
+  }
+  return "";
+}
+
 export async function POST(req: Request) {
-  /* Accept the key under any of the common names people use, and trim
-   * stray whitespace from pasted values — the #1 cause of silent failures. */
-  const key =
-    process.env.GEMINI_API_KEY ||
-    process.env.GEMINI_KEY ||
-    process.env.GEMINI_APIKEY ||
-    process.env.GOOGLE_AI_API_KEY ||
-    process.env.GOOGLE_GENERATIVE_AI_API_KEY ||
-    process.env.GOOGLE_API_KEY ||
-    "";
-  if (!key.trim())
+  const key = resolveApiKey();
+  if (!key)
     return NextResponse.json(
       {
         error: "ai-not-configured",
-        hint: "Add the Gemini key as an environment variable (e.g. GEMINI_API_KEY) in Vercel, tick the Production environment, then redeploy.",
+        hint: "Add the Gemini key as an environment variable named GEMINI_API_KEY in Vercel (tick the Production environment, then redeploy).",
       },
       { status: 503 },
     );
