@@ -31,13 +31,16 @@ export function Logo({
   href?: string;
 }) {
   return (
-    <Link href={href} className="group inline-flex items-center gap-2.5" aria-label="Locora home">
+    <Link href={href} className="group inline-flex shrink-0 items-center gap-2.5" aria-label="Locora home">
       <LogoMark
         size={size}
         className="drop-shadow-sm transition-transform duration-500 group-hover:-rotate-6 group-hover:scale-110 group-hover:drop-shadow-lg"
       />
+      {/* wordmark hidden on narrow phones (<390px) so the navbar can never
+          overflow there even with the phone's font size set to max — the
+          mark alone identifies the app (same pattern as native apps) */}
       <span
-        className={`text-[21px] font-extrabold tracking-tight ${dark ? "text-white" : "text-ink-900"}`}
+        className={`text-[21px] font-extrabold tracking-tight max-[389px]:hidden ${dark ? "text-white" : "text-ink-900"}`}
       >
         Locora
         <span className="text-brand-500">.</span>

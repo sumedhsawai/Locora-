@@ -85,7 +85,7 @@ function NotificationsMenu() {
     <Dropdown
       widthClass="w-[340px] sm:w-[380px]"
       button={() => (
-        <span className="relative flex h-10 w-10 items-center justify-center rounded-full text-ink-600 transition hover:bg-stone-100">
+        <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-ink-600 transition hover:bg-stone-100">
           <Bell size={19} />
           {unread > 0 && (
             <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-rose-500 px-1 text-[9.5px] font-extrabold text-white ring-2 ring-white">
@@ -164,14 +164,14 @@ function AreaPicker({ compact = false }: { compact?: boolean }) {
       <button
         onClick={() => dispatch({ type: "SET_LOCATION", location: null })}
         className={
-          compact
-            ? "flex items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1.5 text-[12px] font-bold text-ink-700 transition hover:bg-stone-200"
-            : "flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-[13px] font-bold text-ink-800 ring-1 ring-stone-200/80 transition hover:ring-brand-300"
-        }
-        title="Change city"
-      >
-        <MapPin size={compact ? 13 : 15} className="text-brand-600" />
-        <span className={compact ? "max-w-[90px] truncate sm:max-w-[150px]" : "max-w-[150px] truncate"}>{placeLabel(loc)}</span>
+            compact
+              ? "flex min-w-0 items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1.5 text-[12px] font-bold text-ink-700 transition hover:bg-stone-200"
+              : "flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-[13px] font-bold text-ink-800 ring-1 ring-stone-200/80 transition hover:ring-brand-300"
+          }
+          title="Change city"
+        >
+          <MapPin size={compact ? 13 : 15} className="shrink-0 text-brand-600" />
+          <span className={compact ? "min-w-0 max-w-[80px] truncate sm:max-w-[150px]" : "max-w-[150px] truncate"}>{placeLabel(loc)}</span>
       </button>
     );
   }
@@ -184,17 +184,17 @@ function AreaPicker({ compact = false }: { compact?: boolean }) {
         <span
           className={
             compact
-              ? "flex items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1.5 text-[12px] font-bold text-ink-700"
+              ? "flex min-w-0 items-center gap-1.5 rounded-full bg-stone-100 px-3 py-1.5 text-[12px] font-bold text-ink-700"
               : "flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-[13px] font-bold text-ink-800 ring-1 ring-stone-200/80 transition hover:ring-stone-300"
           }
         >
-          <MapPin size={compact ? 13 : 15} className="text-brand-600" />
+          <MapPin size={compact ? 13 : 15} className="shrink-0 text-brand-600" />
           {/* compact (mobile header): short label + tight cap so the navbar never
               overflows on 360px screens; full label on desktop */}
-          <span className={compact ? "max-w-[90px] truncate sm:max-w-[130px]" : "max-w-[130px] truncate"}>
+          <span className={compact ? "min-w-0 max-w-[80px] truncate sm:max-w-[130px]" : "max-w-[130px] truncate"}>
             {current === "all" ? (compact ? CITY : `All of ${CITY}`) : areaName(current)}
           </span>
-          <ChevronDown size={14} className="text-ink-400" />
+          <ChevronDown size={14} className="shrink-0 text-ink-400" />
         </span>
       )}
     >
@@ -253,7 +253,7 @@ function AvatarMenu() {
   return (
     <Dropdown
       button={() => (
-        <span className="flex items-center gap-2 rounded-full p-0.5 pr-2 transition hover:bg-stone-100">
+        <span className="flex shrink-0 items-center gap-2 rounded-full p-0.5 pr-2 transition hover:bg-stone-100">
           <Avatar user={currentUser} size="md" ring={false} />
           <ChevronDown size={14} className="hidden text-ink-400 sm:block" />
         </span>
@@ -329,7 +329,7 @@ export function AppNavbar() {
           </span>
         </button>
 
-        <div className="ml-auto flex items-center gap-1.5 sm:gap-2.5">
+        <div className="ml-auto flex min-w-0 items-center gap-1.5 sm:gap-2.5">
           <span className="hidden lg:block">
             <AreaPicker />
           </span>
